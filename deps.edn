@@ -1,0 +1,39 @@
+{:paths ["src"]
+ :deps
+ {
+  user.java.io {:mvn/version "2018.292.56227"}
+  }
+ :aliases
+ {
+  :provided
+  {:extra-deps
+   {
+    org.clojure/tools.deps.alpha {:mvn/version "0.5.460" :scope "provided"}
+    org.apache.maven/maven-model {:mvn/version "3.5.4"}
+    }}
+
+
+  :test
+  {:extra-paths ["test"]
+   :extra-deps
+   {
+
+    badigeon/badigeon         {:git/url "https://github.com/aJchemist/badigeon.git" :sha "0d3df0284548310e77b75c8672666cac4cb902e9"}
+    com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git" :sha "028a6d41ac9ac5d5c405dfc38e4da6b4cc1255d5"}
+
+    org.clojure/tools.cli {:mvn/version "0.4.1"}
+    }}
+
+
+  :1.9
+  {:extra-deps
+   {
+    org.clojure/clojure {:mvn/version "1.9.0"}
+    }}
+
+
+  :1.10
+  {:extra-deps
+   {
+    org.clojure/clojure {:mvn/version "1.10.0-beta1"}
+    }}}}
