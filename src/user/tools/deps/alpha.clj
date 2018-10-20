@@ -25,4 +25,12 @@
    (:classpath (deps.make-classpath/create-classpath deps-map opts))))
 
 
+(defn get-jarpath
+  ^String
+  [lib coord]
+  (let [path (get-in (deps/resolve-deps {:deps {lib coord}} {}) [lib :paths 0])]
+    (when (str/ends-with? path ".jar")
+      path)))
+
+
 (set! *warn-on-reflection* false)
