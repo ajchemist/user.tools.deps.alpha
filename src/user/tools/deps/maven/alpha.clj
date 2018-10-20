@@ -1,6 +1,7 @@
 (ns user.tools.deps.maven.alpha
   (:require
    [clojure.java.io :as jio]
+   [clojure.string :as str]
    [clojure.tools.deps.alpha.gen.pom :as gen.pom]
    [user.tools.deps.alpha :as u.deps]
    )
@@ -23,6 +24,8 @@
    org.apache.maven.model.Scm
    org.apache.maven.model.io.xpp3.MavenXpp3Reader
    org.apache.maven.model.io.xpp3.MavenXpp3Writer
+   org.sonatype.plexus.components.cipher.DefaultPlexusCipher
+   org.sonatype.plexus.components.sec.dispatcher.DefaultSecDispatcher
    ))
 
 
@@ -222,6 +225,37 @@
 (defn store-pom-properties
   [^OutputStream os ^Properties pom-properties ^String comments]
   (.store pom-properties os comments))
+
+
+;; * crypto
+
+
+(defn decode-password
+  [^String encoded ^String key]
+  (let [cipher (DefaultPlexusCipher.)]
+    (.decryptDecorated cipher encoded key)))
+
+
+(defn decode-master-password
+  [^String encoded]
+  (decode-password encoded  DefaultSecDispatcher/SYSTEM_PROPERTY_SEC_LOCATION))
+
+
+;; * artifact
+
+
+(defn artifact-with-default-extension
+  [{:keys [file-path] :as artifact}]
+  (cond
+    (contains? artifact :extension)                artifact
+    (str/ends-with? (str file-path) ".jar")        (assoc artifact :extension "jar")
+    (str/ends-with? (str file-path) "pom.xml")     (assoc artifact :extension "pom")
+    (str/ends-with? (str file-path) ".jar.asc")    (assoc artifact :extension "jar.asc")
+    (str/ends-with? (str file-path) "pom.xml.asc") (assoc artifact :extension "pom.asc")
+    :else                                          artifact))
+
+
+;; * finish
 
 
 (set! *warn-on-reflection* false)
