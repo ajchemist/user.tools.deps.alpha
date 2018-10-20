@@ -85,13 +85,14 @@
 (defn dotfiles-pred
   [{:keys [path]}]
   (let [path (u.jio/path path)]
-    (str/starts-with? path ".")))
+    (.startsWith path ".")))
 
 
 (defn emacs-backups-pred
   [{:keys [path]}]
   (let [path (u.jio/path path)]
-    (or (str/ends-with? path "~") (str/starts-with? path "#"))))
+    (or (.endsWith path "~")
+        (.startsWith path "#"))))
 
 
 (defn default-exclusion-predicate
