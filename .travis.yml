@@ -38,6 +38,8 @@ jobs:
       jdk: openjdk8
       env: TESTOPT=""
       script: clojure -R:1.9 -A:provided:test -m script.package
+      before_cache:
+        - mvn dependency:get -Dartifact=org.apache.maven.plugins:maven-deploy-plugin:2.7
       after_success:
         - git config --local user.name "aJchemist"
         - git config --local user.email "valchemist@me.com"
