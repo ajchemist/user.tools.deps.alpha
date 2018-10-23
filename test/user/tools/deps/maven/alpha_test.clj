@@ -5,6 +5,9 @@
    ))
 
 
+;; https://github.com/sonatype/plexus-sec-dispatcher/blob/master/src/main/java/org/sonatype/plexus/components/sec/dispatcher/DefaultSecDispatcher.java#L192
+
+
 (comment
   (let [security-dispatcher       (doto (DefaultSecDispatcher.) (.setConfigurationFile (str (jio/file (System/getProperty "user.home") ".m2" "settings-security.xml"))))
         settings-decrypter        (DefaultSettingsDecrypter.)
