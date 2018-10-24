@@ -195,9 +195,9 @@
      :or   {exclusion-predicate default-exclusion-predicate}
      :as   options}]
    (let [pom            (maven/read-pom pom-path)
-         maven-coords   {:mvn/version (.getVersion (maven/read-pom "pom.xml"))}
-         artifact-id    (.getArtifactId (maven/read-pom "pom.xml"))
-         group-id       (.getGroupId (maven/read-pom "pom.xml"))
+         maven-coords   {:mvn/version (.getVersion pom)}
+         artifact-id    (.getArtifactId pom)
+         group-id       (.getGroupId pom)
          lib            (keyword group-id artifact-id)
          out-path       (u.jio/path (or out-path
                                         (and jarname (u.jio/path-resolve target-path jarname))
