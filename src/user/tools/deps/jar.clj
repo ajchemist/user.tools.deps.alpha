@@ -161,9 +161,9 @@
               (pom-xml-operation (or pom-path "pom.xml") group-id artifact-id)
               (pom-properties-operation pom-properties group-id artifact-id)
               (deps-edn-operation group-id artifact-id)]
-             (when compile-path (u.jio/paths-copy-operations [compile-path]))
-             (when-not (empty? paths) (u.jio/paths-copy-operations paths))
-             extra-operations))))
+             (u.jio/paths-copy-operations paths)
+             extra-operations
+             (u.jio/paths-copy-operations [compile-path])))))
      (.close jarfs)
      (str out-path))))
 
@@ -181,6 +181,7 @@
   ([pom-path]
    (maven-jar pom-path nil nil))
   ([pom-path
+    maven-coords
     paths
     {:keys [out-path
             target-path
@@ -195,7 +196,7 @@
      :or   {exclusion-predicate default-exclusion-predicate}
      :as   options}]
    (let [pom            (maven/read-pom pom-path)
-         maven-coords   {:mvn/version (.getVersion pom)}
+         maven-coords   (update maven-coords :mvn/version #(or % (.getVersion pom)))
          artifact-id    (.getArtifactId pom)
          group-id       (.getGroupId pom)
          lib            (keyword group-id artifact-id)
@@ -227,9 +228,9 @@
               {:op :copy :src (str pom-path) :path (str "META-INF/maven/" group-id "/" artifact-id "/pom.xml")}
               (pom-properties-operation pom-properties group-id artifact-id)
               (deps-edn-operation group-id artifact-id)]
-             (when compile-path (u.jio/paths-copy-operations [compile-path]))
-             (when-not (empty? paths) (u.jio/paths-copy-operations paths))
-             extra-operations))))
+             (u.jio/paths-copy-operations paths)
+             extra-operations
+             (u.jio/paths-copy-operations [compile-path])))))
      (.close jarfs)
      (str out-path))))
 
