@@ -161,9 +161,9 @@
               (pom-xml-operation (or pom-path "pom.xml") group-id artifact-id)
               (pom-properties-operation pom-properties group-id artifact-id)
               (deps-edn-operation group-id artifact-id)]
-             (u.jio/paths-copy-operations paths)
+             (when-not (empty? paths) (u.jio/paths-copy-operations paths))
              extra-operations
-             (u.jio/paths-copy-operations [compile-path])))))
+             (when compile-path (u.jio/paths-copy-operations [compile-path]))))))
      (.close jarfs)
      (str out-path))))
 
@@ -179,7 +179,7 @@
   - exclusion-predicate: A predicate to exclude operations that would otherwise been operated to the jar. The predicate takes a parameter: file-operation. Default to a predicate that excludes dotfiles and emacs backup files.
   - allow-all-dependencies?: A boolean that can be set to true to allow any types of dependency, such as local or git dependencies. Default to false, in which case only maven dependencies are allowed - an exception is thrown when this is not the case. When set to true, the jar is produced even in the presence of non-maven dependencies, but only maven dependencies are added to the jar."
   ([pom-path]
-   (maven-jar pom-path nil nil))
+   (maven-jar pom-path nil nil nil))
   ([pom-path
     maven-coords
     paths
@@ -228,9 +228,9 @@
               {:op :copy :src (str pom-path) :path (str "META-INF/maven/" group-id "/" artifact-id "/pom.xml")}
               (pom-properties-operation pom-properties group-id artifact-id)
               (deps-edn-operation group-id artifact-id)]
-             (u.jio/paths-copy-operations paths)
+             (when-not (empty? paths) (u.jio/paths-copy-operations paths))
              extra-operations
-             (u.jio/paths-copy-operations [compile-path])))))
+             (when compile-path (u.jio/paths-copy-operations [compile-path]))))))
      (.close jarfs)
      (str out-path))))
 
