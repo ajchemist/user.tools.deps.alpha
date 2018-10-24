@@ -29,8 +29,7 @@
   (let [compile-path (io/mkdir compile-path)]
     (binding [*compile-path*     (str compile-path)
               *compiler-options* (or compiler-options *compiler-options*)]
-      (doseq [namespace namespaces]
-        (clojure.core/compile namespace)))))
+      (run! clojure.core/compile namespaces))))
 
 
 (defn classpath->paths
