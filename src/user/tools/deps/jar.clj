@@ -161,9 +161,9 @@
               (pom-xml-operation (or pom-path "pom.xml") group-id artifact-id)
               (pom-properties-operation pom-properties group-id artifact-id)
               (deps-edn-operation group-id artifact-id)]
+             (when compile-path (u.jio/paths-copy-operations [compile-path]))
              (when-not (empty? paths) (u.jio/paths-copy-operations paths))
-             extra-operations
-             (when compile-path (u.jio/paths-copy-operations [compile-path]))))))
+             extra-operations))))
      (.close jarfs)
      (str out-path))))
 
@@ -228,9 +228,9 @@
               {:op :copy :src (str pom-path) :path (str "META-INF/maven/" group-id "/" artifact-id "/pom.xml")}
               (pom-properties-operation pom-properties group-id artifact-id)
               (deps-edn-operation group-id artifact-id)]
+             (when compile-path (u.jio/paths-copy-operations [compile-path]))
              (when-not (empty? paths) (u.jio/paths-copy-operations paths))
-             extra-operations
-             (when compile-path (u.jio/paths-copy-operations [compile-path]))))))
+             extra-operations))))
      (.close jarfs)
      (str out-path))))
 
