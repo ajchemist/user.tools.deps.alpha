@@ -1,7 +1,7 @@
 {:paths ["src"]
  :deps
  {
-  user.java.io {:mvn/version "2018.297.47684"}
+  user.java.io {:mvn/version "2018.299.3767"}
   }
  :aliases
  {
@@ -17,8 +17,6 @@
   {:extra-paths ["test"]
    :extra-deps
    {
-
-    badigeon/badigeon         {:git/url "https://github.com/aJchemist/badigeon.git" :sha "0d3df0284548310e77b75c8672666cac4cb902e9"}
     com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git" :sha "028a6d41ac9ac5d5c405dfc38e4da6b4cc1255d5"}
 
     org.clojure/tools.cli {:mvn/version "0.4.1"}
