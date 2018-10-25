@@ -50,8 +50,11 @@
   [namespaces compile-path compiler-options]
   (let [namespaces       (read-string namespaces)
         compiler-options (read-string compiler-options)]
-    (do-compile namespaces compile-path compiler-options)
-    (clojure.core/shutdown-agents)))
+    (try
+      (do-compile namespaces compile-path compiler-options)
+      (clojure.core/shutdown-agents)
+      (catch Throwable e
+        (.printStackTrace e)))))
 
 
 (defn compile
@@ -66,7 +69,7 @@
    (let [compile-path   (or compile-path CLASSES_PATH)
          compile-path   (io/mkdir compile-path)
          ;; We must ensure early that the compile-path exists otherwise the Clojure Compiler has issues compiling classes / loading classes. I'm not sure why exactly
-         classpath      (or classpath (u.deps/make-classpath))
+         classpath      (or classpath (System/getProperty "java.class.path"))
          classpath-urls (->> classpath classpath->paths paths->urls (into-array URL))
          classloader    (URLClassLoader. classpath-urls (.getParent (ClassLoader/getSystemClassLoader)))
          main-class     (.loadClass classloader "clojure.main")
