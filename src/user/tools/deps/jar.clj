@@ -225,6 +225,47 @@
                (when-not (empty? paths) (u.jio/paths-copy-operations paths))
                extra-operations)))))
      (str out-path))))
+
+
+(defn maven-jar
+  ([pom-path]
+   (maven-jar pom-path nil nil nil))
+  ([pom-path
+    maven-coords
+    paths
+    {:keys [out-path
+            target-path
+            jarname
+            compile-path
+            deps-map
+            main
+            manifest
+            pom-properties
+            extra-operations
+            exclusion-predicate
+            allow-all-dependencies?]
+     :or   {exclusion-predicate default-exclusion-predicate}
+     :as   options}]
+   (let [pom          (maven/read-pom pom-path)
+         artifact-id  (.getArtifactId pom)
+         group-id     (.getGroupId pom)
+         maven-coords (update maven-coords :mvn/version #(or % (.getVersion pom)))
+         target-path  (u.jio/path (or target-path "target"))
+         out-path     (u.jio/path (or out-path
+                                      (and jarname (u.jio/path-resolve target-path jarname))
+                                      (make-jarpath artifact-id maven-coords target-path)))
+         _            (when-not (str/ends-with? (str out-path) ".jar")
+                        (throw
+                          (ex-info "out-path must be a jar file"
+                            {:out-path out-path})))
+         deps-map     (or deps-map (u.deps/deps-map))
+         paths        (or paths (:paths deps-map))]
+     (when-not allow-all-dependencies?
+       (check-non-maven-dependencies deps-map))
+     (with-open [jarfs (util.jar/getjarfs out-path)]
+       (let [the-manifest   (util.jar/create-manifest main manifest)
+             pom-properties (or pom-properties (maven/make-pom-properties (keyword group-id artifact-id) maven-coords))]
+         (io/do-operations
            (u.jio/path jarfs)
            (transduce
              (comp
