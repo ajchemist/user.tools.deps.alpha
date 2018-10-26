@@ -74,13 +74,16 @@
   (let [compile-dir (io/path compile-dir)]
     (io/mkdir compile-dir)
     (binding [*java-paths* (transient [])]
-      (doseq [source-dir java-source-paths
-              :let [source-dir (io/path source-dir)]]
-        (Files/walkFileTree
-          source-dir
-          (EnumSet/of FileVisitOption/FOLLOW_LINKS)
-          Integer/MAX_VALUE
-          (make-file-visitor compiler source-dir compile-dir visit-path)))
+      (run!
+        (fn [source-dir]
+          (when (io/directory? source-dir)
+            (let [source-dir (io/path source-dir)]
+              (Files/walkFileTree
+                source-dir
+                (EnumSet/of FileVisitOption/FOLLOW_LINKS)
+                Integer/MAX_VALUE
+                (make-file-visitor compiler source-dir compile-dir visit-path)))))
+        java-source-paths)
       (let [java-paths (persistent! *java-paths*)]
         (when (seq java-paths)
           (let [javac-command (javac-command classpath compile-dir java-paths javac-options)]
@@ -98,7 +101,7 @@
   ([java-source-paths compile-path classpath javac-options]
    (let [compiler     (ToolProvider/getSystemJavaCompiler)
          compile-path (or compile-path "target/classes")
-         classpath    (or classpath (u.deps/make-classpath))]
+         classpath    (or classpath (System/getProperty "java.class.path"))]
      (when (nil? compiler)
        (throw (ex-info "Java compiler not found" {})))
      (javac* compiler java-source-paths compile-path classpath javac-options))))

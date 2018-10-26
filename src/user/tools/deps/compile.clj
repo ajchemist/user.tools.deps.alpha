@@ -105,7 +105,7 @@
   (compile
     '[user.tools.deps.alpha]
     "target/classes"
-    (u.deps/make-classpath)
+    nil
     {:elide-meta [:doc :file :line :added]})
 
 
