@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>user.tools.deps.alpha</groupId>
   <artifactId>user.tools.deps.alpha</artifactId>
-  <version>2018.298.71959</version>
+  <version>2018.299.58953</version>
   <scm>
     <url>https://github.com/aJchemist/user.tools.deps.alpha</url>
   </scm>
@@ -17,7 +17,7 @@
     <dependency>
       <groupId>user.java.io</groupId>
       <artifactId>user.java.io</artifactId>
-      <version>2018.297.47684</version>
+      <version>2018.299.58342</version>
     </dependency>
   </dependencies>
   <repositories>
