@@ -3,13 +3,18 @@
    [clojure.string :as str]
    [clojure.java.io :as jio]
    [user.java.io.alpha :as u.jio]
+   [user.tools.deps.io :as io]
    [user.tools.deps.alpha :as u.deps]
    [user.tools.deps.maven.alpha :as maven]
    [user.tools.deps.util.jar :as util.jar]
    )
   (:import
+   java.io.File
    java.io.OutputStream
+   java.nio.file.Files
    java.nio.file.Path
+   java.nio.file.FileSystem
+   java.util.jar.JarEntry
    java.util.jar.Manifest
    ))
 
@@ -84,16 +89,27 @@
            :dep dep})))))
 
 
-;; * exclusions
+;; * predicate
 
 
-(defn dotfiles-pred
+(defn entry-excluded?
+  [^String entry-name]
+  (or (str/starts-with? entry-name "META-INF/leiningen")
+      (str/starts-with? entry-name "META-INF/user.tools.deps.alpha")
+      (some
+        #(re-matches % entry-name)
+        [#"(?i)(?:AUTHOR|LICENSE|COPYRIGHT)(?:\..*)?"
+         #"(?i)META-INF/.*\.(?:MF|SF|RSA|DSA)"
+         #"(?i)META-INF/(?:INDEX\.LIST|DEPENDENCIES|NOTICE|LICENSE)(?:\.txt|\.md|\.html)?"])))
+
+
+(defn dotfiles-exclusion-predicate
   [{:keys [path]}]
   (let [path (u.jio/path path)]
     (.startsWith path ".")))
 
 
-(defn emacs-backups-pred
+(defn emacs-backups-exclusion-predicate
   [{:keys [path]}]
   (let [path (u.jio/path path)]
     (or (.endsWith path "~")
@@ -102,8 +118,45 @@
 
 (defn default-exclusion-predicate
   [op]
-  (or (dotfiles-pred op)
-      (emacs-backups-pred op)))
+  (or (dotfiles-exclusion-predicate op)
+      (emacs-backups-exclusion-predicate op)))
+
+
+;; * uber
+
+
+(defn copy-jar
+  [jarpath ^Path dest-path]
+  (io/consume-jar
+    (str jarpath)
+    (fn [is ^JarEntry entry]
+      (let [entry-name (.getName entry)
+            target     (.resolve dest-path entry-name)]
+        (if (.isDirectory entry)
+          (u.jio/mkdir target)
+          (when-not (entry-excluded? entry-name)
+            (io/copy! is (doto target (u.jio/mkparents)))))))))
+
+
+(defn copy-directory
+  [src ^Path dest-path]
+  (let [src-path (u.jio/path src)]
+    (Files/walkFileTree
+      src-path
+      (u.jio/make-file-visitor
+        (fn [[path attr]]
+          (io/copy! path (doto (.resolve dest-path (str (.relativize src-path path))) (u.jio/mkparents))))))))
+
+
+(defn uber-classpath
+  [^String classpath ^Path dest-path]
+  (run!
+    (fn [path]
+      (cond
+        (str/ends-with? path ".jar") (copy-jar path dest-path)
+        (u.jio/directory? path)      (copy-directory path dest-path)
+        :else                        (println "[uber-classpath] no uber method:" path)))
+    (str/split classpath (re-pattern File/pathSeparator))))
 
 
 ;; * jar
@@ -172,6 +225,13 @@
                (when-not (empty? paths) (u.jio/paths-copy-operations paths))
                extra-operations)))))
      (str out-path))))
+
+
+(defn uberjar
+  [jarpath classpath]
+  (with-open [jarfs (util.jar/getjarfs jarpath)]
+    (uber-classpath classpath (u.jio/path jarfs)))
+  jarpath)
 
 
 (set! *warn-on-reflection* false)
