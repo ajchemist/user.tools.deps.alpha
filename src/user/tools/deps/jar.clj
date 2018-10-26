@@ -208,7 +208,23 @@
      (with-open [jarfs (util.jar/getjarfs out-path)]
        (let [the-manifest   (util.jar/create-manifest main manifest)
              pom-properties (or pom-properties (maven/make-pom-properties lib maven-coords))]
-         (u.jio/do-operations
+         (io/do-operations
+           (u.jio/path jarfs)
+           (transduce
+             (comp
+               (filter map?)
+               (remove (fn [op] (exclusion-predicate op))))
+             conj
+             []
+             (concat
+               [(manifest-mf-operation the-manifest)
+                (pom-xml-operation (or pom-path "pom.xml") group-id artifact-id)
+                (pom-properties-operation pom-properties group-id artifact-id)
+                (deps-edn-operation group-id artifact-id)]
+               (when compile-path (u.jio/paths-copy-operations [compile-path]))
+               (when-not (empty? paths) (u.jio/paths-copy-operations paths))
+               extra-operations)))))
+     (str out-path))))
            (u.jio/path jarfs)
            (transduce
              (comp
