@@ -17,7 +17,11 @@
 (set! *warn-on-reflection* true)
 
 
-(defn ^String make-jarname
+;;
+
+
+(defn make-jarname
+  ^String
   [artifact-id {:keys [:mvn/version classifier extension]}]
   (let [classifier (when classifier (str "-" (name classifier)))
         version    (when version (str "-" version))
@@ -25,13 +29,15 @@
     (str artifact-id version classifier extension)))
 
 
-(defn ^Path make-jarpath
+(defn make-jarpath
+  ^Path
   [artifact-id maven-coords target-path]
-  (let [target-path (u.jio/path (or target-path "target"))]
+  (let [target-path (u.jio/path target-path)]
     (.resolve target-path (make-jarname artifact-id maven-coords))))
 
 
 (defn get-jar-filesystem
+  ^FileSystem
   [artifact-id maven-coords target-path]
   (util.jar/getjarfs (make-jarpath artifact-id maven-coords target-path)))
 
@@ -41,9 +47,10 @@
 
 (defn manifest-mf-operation
   [^Manifest manifest]
-  {:op       :write
-   :path     "META-INF/MANIFEST.MF"
-   :write-fn (fn [^OutputStream os] (. manifest write os))})
+  (when manifest
+    {:op       :write
+     :path     "META-INF/MANIFEST.MF"
+     :write-fn (fn [^OutputStream os] (. manifest write os))}))
 
 
 (defn pom-xml-operation
@@ -62,9 +69,8 @@
 
 (defn deps-edn-operation
   [group-id artifact-id]
-  (let [edn-path (u.jio/path "deps.edn")]
-    (when (u.jio/file? edn-path)
-      {:op :copy :src (str edn-path) :path (str "META-INF/user.tools.deps.alpha/" group-id "/" artifact-id "/deps.edn")})))
+  (when (u.jio/file? "deps.edn")
+    {:op :copy :src "deps.edn" :path (str "META-INF/user.tools.deps.alpha/" group-id "/" artifact-id "/deps.edn")}))
 
 
 (defn check-non-maven-dependencies
@@ -134,6 +140,7 @@
      :as   options}]
    (let [artifact-id (name lib)
          group-id    (or (namespace lib) artifact-id)
+         target-path (u.jio/path (or target-path "target"))
          out-path    (u.jio/path (or out-path
                                      (and jarname (u.jio/path-resolve target-path jarname))
                                      (make-jarpath artifact-id maven-coords target-path)))
