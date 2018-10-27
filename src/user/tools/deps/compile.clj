@@ -24,11 +24,12 @@
 (def ^:const CLASSES_PATH "target/classes")
 
 
-(defn- do-compile
+(defn run-compile
   [namespaces compile-path compiler-options]
   (let [compile-path (io/mkdir compile-path)]
-    (binding [*compile-path*     (str compile-path)
-              *compiler-options* (or compiler-options *compiler-options*)]
+    (binding [clojure.core/*loaded-libs* (ref (sorted-set))
+              *compile-path*             (str compile-path)
+              *compiler-options*         (or compiler-options *compiler-options*)]
       (run! clojure.core/compile namespaces))))
 
 
@@ -51,7 +52,7 @@
   (let [namespaces       (read-string namespaces)
         compiler-options (read-string compiler-options)]
     (try
-      (do-compile namespaces compile-path compiler-options)
+      (run-compile namespaces compile-path compiler-options)
       (clojure.core/shutdown-agents)
       (catch Throwable e
         (.printStackTrace e)))))
@@ -71,6 +72,7 @@
          ;; We must ensure early that the compile-path exists otherwise the Clojure Compiler has issues compiling classes / loading classes. I'm not sure why exactly
          classpath      (or classpath (System/getProperty "java.class.path"))
          classpath-urls (->> classpath classpath->paths paths->urls (into-array URL))
+         ;; classpath isolation
          classloader    (URLClassLoader. classpath-urls (.getParent (ClassLoader/getSystemClassLoader)))
          main-class     (.loadClass classloader "clojure.main")
          main-method    (.getMethod main-class "main" (into-array Class [(Class/forName "[Ljava.lang.String;")]))
