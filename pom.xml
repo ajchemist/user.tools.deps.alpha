@@ -4,20 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>user.tools.deps.alpha</groupId>
   <artifactId>user.tools.deps.alpha</artifactId>
-  <version>2018.301.45247</version>
+  <version>2018.301.51671</version>
   <scm>
     <url>https://github.com/aJchemist/user.tools.deps.alpha</url>
   </scm>
   <dependencies>
     <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-      <version>1.9.0</version>
-    </dependency>
-    <dependency>
       <groupId>user.java.io</groupId>
       <artifactId>user.java.io</artifactId>
-      <version>2018.299.58342</version>
+      <version>2018.301.48672</version>
     </dependency>
   </dependencies>
   <repositories>
