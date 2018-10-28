@@ -118,6 +118,11 @@
    (let [system         (util.maven/make-system)
          session        (with-redefs [util.maven/console-listener console-listener]
                           (util.maven/make-session system util.maven/default-local-repo))
+         [lib version]  (if-let [pom-path (some (fn [{:keys [file-path]}] (when (str/ends-with? file-path "pom.xml") file-path)) artifacts)]
+                          (let [pom (maven/read-pom pom-path)]
+                            [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
+                             (or version (.getVersion pom))])
+                          [lib version])
          artifacts      (map #(make-artifact lib version %) artifacts)
          deploy-request (-> (DeployRequest.)
                           (.setRepository (remote-repo repository credentials)))
