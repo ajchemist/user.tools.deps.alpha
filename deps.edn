@@ -1,7 +1,7 @@
 {:paths ["src"]
  :deps
  {
-  user.java.io {:mvn/version "2018.299.58342"}
+  user.java.io {:mvn/version "2018.301.48672"}
   }
  :aliases
  {
