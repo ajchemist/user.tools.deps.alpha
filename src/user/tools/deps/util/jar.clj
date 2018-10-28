@@ -9,8 +9,8 @@
    java.io.OutputStream
    java.net.URI
    java.nio.file.FileSystem
-   java.nio.file.FileSystems
    java.nio.file.FileSystemLoopException
+   java.nio.file.FileSystems
    java.nio.file.FileVisitOption
    java.nio.file.FileVisitResult
    java.nio.file.FileVisitor
@@ -27,6 +27,8 @@
    java.util.jar.Attributes
    java.util.jar.Attributes$Name
    java.util.jar.JarEntry
+   java.util.jar.JarEntry
+   java.util.jar.JarFile
    java.util.jar.JarOutputStream
    java.util.jar.Manifest
    ))
@@ -68,6 +70,26 @@
         (catch java.nio.file.FileSystemNotFoundException _
           (mkjarfs jarpath)))
       (mkjarfs jarpath {:create true}))))
+
+
+;; * jar file entry
+
+
+(defrecord JarFileEntry [^JarFile jarfile ^JarEntry entry]
+  jio/IOFactory
+  (make-input-stream [x opts]
+    (jio/make-input-stream
+      (.getInputStream jarfile entry)
+      opts))
+  (make-reader [x opts]
+    (jio/make-reader (jio/make-input-stream x opts) opts)))
+
+
+(defn jar-entry
+  ^JarFileEntry
+  [jarpath ^String entry-name]
+  (let [jarfile (JarFile. (str jarpath))]
+    (->JarFileEntry jarfile (.getJarEntry jarfile entry-name))))
 
 
 ;; * manifest
