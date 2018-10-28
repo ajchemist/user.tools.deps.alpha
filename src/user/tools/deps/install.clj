@@ -19,7 +19,6 @@
   - file-path: The path to the jar to be installed.
   - pom-file-path: The path to the pom.xml file to be installed. Default to \"pom.xml\"
   - local-repo: The path to the local maven repository where the library is to be installed. Default to ~/.m2/repository ."
-
   ([lib maven-coords file-path pom-path]
    (install lib maven-coords file-path pom-path nil))
   ([lib maven-coords file-path pom-path {:keys [local-repo]}]

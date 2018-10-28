@@ -32,20 +32,24 @@
       (clean/clean target-path)
       (let [version    (script.time/chrono-version-str)
             mvn-coords {:mvn/version version}
-            pom-file   (maven/sync-pom library mvn-coords)
-            jarpath    (jar/jar library mvn-coords nil {:out-path (. (io/as-path target-path) resolve "package.jar")})]
-        (println (str (install/install library mvn-coords jarpath pom-file)))
-        (println (str "\n- " version "\n"))
-        jarpath))))
+            pom-path   (maven/sync-pom 'user.tools.deps.alpha {:mvn/version (script.time/chrono-version-str)})
+            jarpath    (jar/maven-jar
+                         pom-path nil nil
+                         {:out-path (. (io/as-path target-path) resolve "package.jar")})]
+        (println (str (install/install nil nil jarpath pom-path)))
+        (println "\n- " version "\n")))))
 
 
 (defn -main
   [& xs]
   (try
     (package)
-    (System/exit 0)
+    (catch Throwable e
+      (.printStackTrace e)
+      (System/exit 127))
     (finally
-      (shutdown-agents))))
+      (shutdown-agents)
+      (System/exit 0))))
 
 
 (set! *warn-on-reflection* false)
