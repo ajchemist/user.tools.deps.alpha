@@ -191,7 +191,7 @@
             allow-all-dependencies?]
      :or   {exclusion-predicate default-exclusion-predicate}
      :as   options}]
-   (let [[lib version] (if (u.jio/file? pom-path)
+   (let [[lib version] (if (and pom-path (u.jio/file? pom-path))
                          (let [pom (maven/read-pom pom-path)]
                            [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
                             (update maven-coords :mvn/version #(or % (.getVersion pom)))])
