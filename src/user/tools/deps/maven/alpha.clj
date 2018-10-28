@@ -2,8 +2,10 @@
   (:require
    [clojure.java.io :as jio]
    [clojure.string :as str]
+   [clojure.tools.deps.alpha.util.maven :as util.maven]
    [clojure.tools.deps.alpha.gen.pom :as gen.pom]
-   [user.tools.deps.alpha :as u.deps]
+   [clojure.tools.deps.alpha :as deps]
+   [clojure.tools.deps.alpha.reader :as deps.reader]
    )
   (:import
    clojure.data.xml.node.Element
@@ -189,11 +191,14 @@
 
 (defn sync-pom
   ([lib mvn-coords]
-   (sync-pom lib mvn-coords (u.deps/deps-map)))
+   (sync-pom lib mvn-coords nil))
   ([lib mvn-coords deps-map]
    (sync-pom lib mvn-coords deps-map (jio/file ".")))
-  ([lib {:keys [:mvn/version]} {:keys [deps paths :mvn/repos] :as c} ^File dir]
-   (let [artifact-id (name lib)
+  ([lib {:keys [:mvn/version]} deps-map ^File dir]
+   (let [{:keys [deps paths :mvn/repos]} (update (or deps-map (deps.reader/read-deps ["deps.edn"]))
+                                           :mvn/repos #(merge %2 %) util.maven/standard-repos)
+
+         artifact-id (name lib)
          group-id    (or (namespace lib) artifact-id)
          repos       (remove #(str/starts-with? (-> % val :url) "https://repo1.maven.org") repos)
          pom-file    (jio/file dir "pom.xml")

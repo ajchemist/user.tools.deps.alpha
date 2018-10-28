@@ -3,8 +3,8 @@
    [clojure.string :as str]
    [clojure.java.io :as jio]
    [user.java.io.alpha :as u.jio]
+   [clojure.tools.deps.alpha.reader :as deps.reader]
    [user.tools.deps.io :as io]
-   [user.tools.deps.alpha :as u.deps]
    [user.tools.deps.maven.alpha :as maven]
    [user.tools.deps.util.jar :as util.jar]
    )
@@ -191,18 +191,23 @@
             allow-all-dependencies?]
      :or   {exclusion-predicate default-exclusion-predicate}
      :as   options}]
-   (let [artifact-id (name lib)
-         group-id    (or (namespace lib) artifact-id)
-         target-path (u.jio/path (or target-path "target"))
-         out-path    (u.jio/path (or out-path
-                                     (and jarname (u.jio/path-resolve target-path jarname))
-                                     (make-jarpath artifact-id maven-coords target-path)))
-         _           (when-not (str/ends-with? (str out-path) ".jar")
-                       (throw
-                         (ex-info "out-path must be a jar file"
-                           {:out-path out-path})))
-         deps-map    (or deps-map (u.deps/deps-map))
-         paths       (or paths (:paths deps-map))]
+   (let [[lib version] (if (u.jio/file? pom-path)
+                         (let [pom (maven/read-pom pom-path)]
+                           [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
+                            (update maven-coords :mvn/version #(or % (.getVersion pom)))])
+                         [lib maven-coords])
+         artifact-id   (name lib)
+         group-id      (or (namespace lib) artifact-id)
+         target-path   (u.jio/path (or target-path "target"))
+         out-path      (u.jio/path (or out-path
+                                       (and jarname (u.jio/path-resolve target-path jarname))
+                                       (make-jarpath artifact-id maven-coords target-path)))
+         _             (when-not (str/ends-with? (str out-path) ".jar")
+                         (throw
+                           (ex-info "out-path must be a jar file"
+                             {:out-path out-path})))
+         deps-map      (or deps-map (deps.reader/read-deps ["deps.edn"]))
+         paths         (or paths (:paths deps-map))]
      (when-not allow-all-dependencies?
        (check-non-maven-dependencies deps-map))
      (with-open [jarfs (util.jar/getjarfs out-path)]
@@ -258,7 +263,7 @@
                         (throw
                           (ex-info "out-path must be a jar file"
                             {:out-path out-path})))
-         deps-map     (or deps-map (u.deps/deps-map))
+         deps-map     (or deps-map (deps.reader/read-deps ["deps.edn"]))
          paths        (or paths (:paths deps-map))]
      (when-not allow-all-dependencies?
        (check-non-maven-dependencies deps-map))

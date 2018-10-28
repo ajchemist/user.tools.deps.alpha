@@ -2,7 +2,9 @@
   (:require
    [clojure.string :as str]
    [clojure.test :as test :refer [deftest is are testing]]
+   [clojure.tools.deps.alpha.util.maven :as util.maven]
    [clojure.tools.deps.alpha :as deps]
+   [clojure.tools.deps.alpha.reader :as deps.reader]
    [user.tools.deps.alpha :refer :all]
    )
   (:import
@@ -27,4 +29,12 @@
 
 
   (str/split (make-classpath) (re-pattern File/pathSeparator))
+
+
+  (deps-map)
+
+  (update (deps.reader/read-deps ["deps.edn"]) :mvn/repos
+    #(merge %2 %)
+    util.maven/standard-repos)
+
   )
