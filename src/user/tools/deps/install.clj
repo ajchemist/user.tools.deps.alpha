@@ -2,10 +2,14 @@
   (:require
    [clojure.tools.deps.alpha.util.maven :as maven]
    [clojure.java.io :as jio]
+   [user.tools.deps.maven.alpha :as u.maven]
    )
   (:import
    org.eclipse.aether.installation.InstallRequest
    ))
+
+
+(set! *warn-on-reflection* true)
 
 
 (defn install
@@ -15,24 +19,28 @@
   - file-path: The path to the jar to be installed.
   - pom-file-path: The path to the pom.xml file to be installed. Default to \"pom.xml\"
   - local-repo: The path to the local maven repository where the library is to be installed. Default to ~/.m2/repository ."
-  ([lib maven-coords file-path]
-   (install lib maven-coords file-path nil nil))
-  ([lib maven-coords file-path pom-file-path]
-   (install lib maven-coords file-path pom-file-path nil))
-  ([lib maven-coords file-path pom-file-path {:keys [local-repo]}]
-   (let [local-repo    (or local-repo maven/default-local-repo)
-         system        (maven/make-system)
-         session       (maven/make-session system local-repo)
-         artifact      (maven/coord->artifact lib maven-coords)
-         artifact      (.setFile artifact (jio/file file-path))
-         pom-file-path (or pom-file-path "pom.xml")
-         pom-artifact  (maven/coord->artifact lib (-> maven-coords
-                                                    (assoc :extension "pom")
-                                                    (dissoc :classifier)))
-         pom-artifact  (.setFile pom-artifact (jio/file pom-file-path))]
+
+  ([lib maven-coords file-path pom-path]
+   (install lib maven-coords file-path pom-path nil))
+  ([lib maven-coords file-path pom-path {:keys [local-repo]}]
+   (let [local-repo   (or local-repo maven/default-local-repo)
+         system       (maven/make-system)
+         session      (maven/make-session system local-repo)
+         pom-path     (or pom-path "pom.xml")
+         _            (assert (.isFile (jio/file pom-path)))
+         pom          (u.maven/read-pom pom-path)
+         maven-coords (update maven-coords :mvn/version #(or % (.getVersion pom)))
+         lib          (or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
+         artifact     (maven/coord->artifact lib maven-coords)
+         artifact     (.setFile artifact (jio/file file-path))
+         pom-artifact (maven/coord->artifact lib (-> maven-coords (assoc :extension "pom") (dissoc :classifier)))
+         pom-artifact (.setFile pom-artifact (jio/file pom-path))]
      (.install system session (-> (InstallRequest.)
                                 (.addArtifact artifact)
                                 (.addArtifact pom-artifact))))))
+
+
+(set! *warn-on-reflection* false)
 
 
 
