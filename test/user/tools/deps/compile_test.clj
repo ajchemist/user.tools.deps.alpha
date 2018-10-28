@@ -28,6 +28,10 @@
   (clean/clean "target/classes")
   (compile #{'user.tools.deps.compile-test.a} "target/classes" nil nil)
   (is (u.jio/file? "target/classes/user/java/io/alpha__init.class"))
+
+
+  ;;
+  (clean/clean "target/classes")
   )
 
 
