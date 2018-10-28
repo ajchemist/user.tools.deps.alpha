@@ -195,7 +195,7 @@
   ([lib {:keys [:mvn/version]} {:keys [deps paths :mvn/repos] :as c} ^File dir]
    (let [artifact-id (name lib)
          group-id    (or (namespace lib) artifact-id)
-         repos       (remove #(= "https://repo1.maven.org/maven2/" (-> % val :url)) repos)
+         repos       (remove #(str/starts-with? (-> % val :url) "https://repo1.maven.org") repos)
          pom-file    (jio/file dir "pom.xml")
          pom         (if (.exists pom-file)
                        (-> (read-pom pom-file)
@@ -205,7 +205,7 @@
                          (replace-repos repos))
                        (gen-pom group-id artifact-id version deps paths repos))]
      (write-pom pom-file pom)
-     pom-file)))
+     (str pom-file))))
 
 
 ;; * pom-properties
