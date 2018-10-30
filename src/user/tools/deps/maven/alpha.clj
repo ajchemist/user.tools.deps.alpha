@@ -6,6 +6,7 @@
    [clojure.tools.deps.alpha.gen.pom :as gen.pom]
    [clojure.tools.deps.alpha :as deps]
    [clojure.tools.deps.alpha.reader :as deps.reader]
+   [user.tools.deps.alpha :as u.deps]
    )
   (:import
    clojure.data.xml.node.Element
@@ -195,8 +196,7 @@
   ([lib mvn-coords deps-map]
    (sync-pom lib mvn-coords deps-map (jio/file ".")))
   ([lib {:keys [:mvn/version]} deps-map ^File dir]
-   (let [{:keys [deps paths :mvn/repos]} (update (or deps-map (deps.reader/read-deps ["deps.edn"]))
-                                           :mvn/repos #(merge %2 %) util.maven/standard-repos)
+   (let [{:keys [deps paths :mvn/repos]} (or deps-map (u.deps/deps-map))
 
          artifact-id (name lib)
          group-id    (or (namespace lib) artifact-id)

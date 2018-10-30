@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as str]
    [clojure.java.io :as jio]
+   [clojure.tools.deps.alpha.util.maven :as mvn]
    [clojure.tools.deps.alpha :as deps]
    [clojure.tools.deps.alpha.reader :as deps.reader]
    [clojure.tools.deps.alpha.script.make-classpath :as deps.make-classpath]
@@ -13,7 +14,8 @@
 
 (defn deps-map
   []
-  (deps.reader/read-deps (:config-files (deps.reader/clojure-env))))
+  (update (deps.reader/read-deps ["deps.edn"])
+    :mvn/repos #(merge %2 %) mvn/standard-repos))
 
 
 (defn make-classpath
@@ -34,3 +36,8 @@
 
 
 (set! *warn-on-reflection* false)
+
+
+(comment
+  (deps.reader/read-deps (:config-files (deps.reader/clojure-env)))
+  )
