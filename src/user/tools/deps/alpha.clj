@@ -12,19 +12,24 @@
 (set! *warn-on-reflection* true)
 
 
-(defn deps-map
+(defn- -deps-map
   []
-  (update (deps.reader/read-deps ["deps.edn"])
+  (update (deps.reader/slurp-deps "deps.edn")
     :mvn/repos #(merge %2 %) mvn/standard-repos))
 
 
+(defn deps-map [] (-deps-map))
+
+
 (defn make-classpath
+  "- deps-map: Default to deps.edn map of the project (without merging the system-level and user-level deps.edn maps)"
   ([]
    (make-classpath nil))
   ([opts]
-   (make-classpath (deps-map) opts))
+   (make-classpath nil opts))
   ([deps-map {:keys [resolve-aliases makecp-aliases aliases] :as opts}]
-   (:classpath (deps.make-classpath/create-classpath deps-map opts))))
+   (let [deps-map (or deps-map (-deps-map))]
+     (:classpath (deps.make-classpath/create-classpath deps-map opts)))))
 
 
 (defn get-jarpath
