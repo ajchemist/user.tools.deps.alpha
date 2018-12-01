@@ -87,11 +87,12 @@
       (let [java-paths (persistent! *java-paths*)]
         (when (seq java-paths)
           (let [javac-command (javac-command classpath compile-dir java-paths javac-options)]
+            ;; This starts Clojure agents. We might need to call shutdown-agents after this
             (.run compiler nil (System/out) (System/err) (into-array String javac-command))))))))
 
 
 (defn javac
-  "Compiles java source files found in the \"source-dir\" directory.
+  "Compiles java source files found in the \"source-dir\" directory. Note that the badigeon.javac/javac functions triggers the start of Clojure agents. You might want to call clojure.core/shutdown-agents to close the agent thread pools.
   - java-source-paths: The paths of a directory containing java source files.
   - compile-path: The path to the directory where .class file are emitted.
   - classpath: The concatenated string of classpath to be passed to javac \"-cp\" argument.

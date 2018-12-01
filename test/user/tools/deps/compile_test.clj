@@ -37,6 +37,11 @@
 
 (comment
 
+
+  java.io.File/pathSeparator
+  (System/getProperty "path.separator")
+
+
   (binding [clojure.core/*loading-verbosely* true]
     (require 'user.java.io.alpha :reload))
 
