@@ -54,6 +54,9 @@
   (ns.find/find-ns-decls [(jio/file "test/user/tools/deps/compile_test")])
 
 
+  (->> (System/getProperty "java.class.path") (classpath->paths) (paths->urls))
+
+
   (compile #{'user.tools.deps.compile-test.a} nil (System/getProperty "java.class.path") nil)
 
 

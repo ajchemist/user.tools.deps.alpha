@@ -24,13 +24,7 @@
 (def ^:const CLASSES_PATH "target/classes")
 
 
-(defn run-compile
-  [namespaces compile-path compiler-options]
-  (let [compile-path (io/mkdir compile-path)]
-    (binding [clojure.core/*loaded-libs* (ref (sorted-set))
-              *compile-path*             (str compile-path)
-              *compiler-options*         (or compiler-options *compiler-options*)]
-      (run! clojure.core/compile namespaces))))
+(def ^:dynamic *main-ns* 'user.tools.deps.compile)
 
 
 (defn classpath->paths
@@ -47,15 +41,7 @@
   (map jio/as-url paths))
 
 
-(defn -main
-  [namespaces compile-path compiler-options]
-  (let [namespaces       (read-string namespaces)
-        compiler-options (read-string compiler-options)]
-    (try
-      (run-compile namespaces compile-path compiler-options)
-      (clojure.core/shutdown-agents)
-      (catch Throwable e
-        (.printStackTrace e)))))
+;;
 
 
 (defn compile
@@ -85,23 +71,34 @@
                               (into-array
                                 Object
                                 [(into-array String
-                                   ["--main"
-                                    "user.tools.deps.compile"
-                                    (pr-str namespaces)
-                                    (str compile-path)
-                                    (pr-str compiler-options)])]))))]
+                                   ["--main" (str *main-ns*)
+                                    (pr-str namespaces) (str compile-path) (pr-str compiler-options)])]))))]
      (.start t)
      (.join t)
      (.close classloader))))
+
+
+;;
+
+
+(defn -main
+  [namespaces compile-path compiler-options]
+  (let [namespaces       (read-string namespaces)
+        compiler-options (read-string compiler-options)]
+    (try
+      (binding [clojure.core/*loaded-libs* (ref (sorted-set))
+                *compile-path*             (str compile-path)
+                *compiler-options*         (or compiler-options *compiler-options*)]
+        (run! clojure.core/compile namespaces))
+      (clojure.core/shutdown-agents)
+      (catch Throwable e
+        (.printStackTrace e)))))
 
 
 (set! *warn-on-reflection* false)
 
 
 (comment
-
-
-  (->> (System/getProperty "java.class.path") (classpath->paths) (paths->urls))
 
 
   (compile
