@@ -102,7 +102,7 @@
   ([java-source-paths compile-path classpath javac-options]
    (let [compiler     (ToolProvider/getSystemJavaCompiler)
          compile-path (or compile-path "target/classes")
-         classpath    (or classpath (System/getProperty "java.class.path"))]
+         classpath    (or classpath (u.deps/make-classpath))]
      (when (nil? compiler)
        (throw (ex-info "Java compiler not found" {})))
      (javac* compiler java-source-paths compile-path classpath javac-options))))
