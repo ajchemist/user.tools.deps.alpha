@@ -60,6 +60,7 @@
          classpath-urls (->> classpath classpath->paths paths->urls (into-array URL))
          ;; classpath isolation
          classloader    (URLClassLoader. classpath-urls (.getParent (ClassLoader/getSystemClassLoader)))
+         main-ns        *main-ns*
          main-class     (.loadClass classloader "clojure.main")
          main-method    (.getMethod main-class "main" (into-array Class [(Class/forName "[Ljava.lang.String;")]))
          t              (Thread.
@@ -71,7 +72,7 @@
                               (into-array
                                 Object
                                 [(into-array String
-                                   ["--main" (str *main-ns*)
+                                   ["--main" (str main-ns)
                                     (pr-str namespaces) (str compile-path) (pr-str compiler-options)])]))))]
      (.start t)
      (.join t)
