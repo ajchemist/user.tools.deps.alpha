@@ -117,12 +117,6 @@
         (.startsWith path "#"))))
 
 
-(defn default-exclusion-predicate
-  [op]
-  (or (dotfiles-exclusion-predicate op)
-      (emacs-backups-exclusion-predicate op)))
-
-
 ;; * uber
 
 
@@ -172,7 +166,7 @@
   - manifest: A map of additionel entries to the jar manifest. Values of the manifest map can be maps to represent manifest sections. By default, the jar manifest contains the \"Created-by\", \"Built-By\" and \"Build-Jdk\" entries.
   - deps: The dependencies of the project. deps have the same format than the :deps entry of a tools.deps map. Dependencies are copied to the pom.xml file produced while generating the jar file. Default to the deps.edn dependencies of the project (excluding the system-level and user-level deps.edn dependencies).
   - mvn/repos: Repositories to be copied to the pom.xml file produced while generating the jar. Must have same format than the :mvn/repos entry of deps.edn. Default to nil.
-  - exclusion-predicate: A predicate to exclude operations that would otherwise been operated to the jar. The predicate takes a parameter: file-operation. Default to a predicate that excludes dotfiles and emacs backup files.
+  - exclusion-predicates: Predicates to exclude operations that would otherwise been operated to the jar. Each predicate takes a parameter: file-operation. Default to predicates that excludes dotfiles and emacs backup files.
   - allow-all-dependencies?: A boolean that can be set to true to allow any types of dependency, such as local or git dependencies. Default to false, in which case only maven dependencies are allowed - an exception is thrown when this is not the case. When set to true, the jar is produced even in the presence of non-maven dependencies, but only maven dependencies are added to the jar."
   ([lib maven-coords]
    (jar lib maven-coords nil nil))
@@ -188,9 +182,10 @@
             pom-path
             pom-properties
             extra-operations
-            exclusion-predicate
+            exclusion-predicates
             allow-all-dependencies?]
-     :or   {exclusion-predicate default-exclusion-predicate}
+     :or   {exclusion-predicates [dotfiles-exclusion-predicate
+                                  emacs-backups-exclusion-predicate]}
      :as   options}]
    (let [[lib version] (if (and pom-path (u.jio/file? pom-path))
                          (let [pom (maven/read-pom pom-path)]
@@ -219,7 +214,7 @@
            (transduce
              (comp
                (filter map?)
-               (remove (fn [op] (exclusion-predicate op))))
+               (remove (fn [op] (some #(% op) exclusion-predicates))))
              conj
              []
              (concat
@@ -248,9 +243,10 @@
             manifest
             pom-properties
             extra-operations
-            exclusion-predicate
+            exclusion-predicates
             allow-all-dependencies?]
-     :or   {exclusion-predicate default-exclusion-predicate}
+     :or   {exclusion-predicates [dotfiles-exclusion-predicate
+                                  emacs-backups-exclusion-predicate]}
      :as   options}]
    (let [pom          (maven/read-pom pom-path)
          artifact-id  (.getArtifactId pom)
@@ -276,7 +272,7 @@
            (transduce
              (comp
                (filter map?)
-               (remove (fn [op] (exclusion-predicate op))))
+               (remove (fn [op] (some #(% op) exclusion-predicates))))
              conj
              []
              (concat
