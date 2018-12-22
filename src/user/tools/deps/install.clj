@@ -2,7 +2,7 @@
   (:require
    [clojure.tools.deps.alpha.util.maven :as maven]
    [clojure.java.io :as jio]
-   [user.tools.deps.maven.alpha :as u.maven]
+   [user.apache.maven.pom.alpha :as pom]
    )
   (:import
    org.eclipse.aether.installation.InstallRequest
@@ -27,7 +27,7 @@
          session      (maven/make-session system local-repo)
          pom-path     (or pom-path "pom.xml")
          _            (assert (.isFile (jio/file pom-path)))
-         pom          (u.maven/read-pom pom-path)
+         pom          (pom/read-pom pom-path)
          maven-coords (update maven-coords :mvn/version #(or % (.getVersion pom)))
          lib          (or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
          artifact     (maven/coord->artifact lib maven-coords)

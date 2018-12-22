@@ -5,7 +5,7 @@
    [clojure.tools.deps.alpha.reader :as deps.reader]
    [clojure.tools.deps.alpha.extensions :as deps.ext]
    [clojure.tools.deps.alpha.extensions.git :as deps.git]
-   [user.java.io.alpha :as io]
+   [user.java.io.alpha :as u.jio]
    [user.tools.deps.maven.alpha :as maven]
    [user.tools.deps.clean :as clean]
    [user.tools.deps.jar :as jar]
@@ -21,8 +21,7 @@
 
 
 (def target-path "target")
-(def classes-path "target/classes")
-(def ^Path library 'user.tools.deps.alpha)
+(def library 'user.tools.deps.alpha)
 
 
 (defn package
@@ -32,10 +31,10 @@
       (clean/clean target-path)
       (let [version    (script.time/chrono-version-str)
             mvn-coords {:mvn/version version}
-            pom-path   (maven/sync-pom 'user.tools.deps.alpha {:mvn/version (script.time/chrono-version-str)})
+            pom-path   (maven/sync-pom library {:mvn/version (script.time/chrono-version-str)})
             jarpath    (jar/maven-jar
                          pom-path nil nil
-                         {:out-path (. (io/as-path target-path) resolve "package.jar")})]
+                         {:out-path (. (u.jio/as-path target-path) resolve "package.jar")})]
         (println (str (install/install nil nil jarpath pom-path)))
         (println "\n- " version "\n")))))
 

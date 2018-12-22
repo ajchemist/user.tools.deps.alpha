@@ -4,6 +4,7 @@
    [clojure.java.io :as jio]
    [user.java.io.alpha :as u.jio]
    [clojure.tools.deps.alpha.reader :as deps.reader]
+   [user.apache.maven.pom.alpha :as pom]
    [user.tools.deps.io :as io]
    [user.tools.deps.alpha :as u.deps]
    [user.tools.deps.maven.alpha :as maven]
@@ -70,7 +71,7 @@
   (when pom-properties
     {:op       :write
      :path     (str "META-INF/maven/" group-id "/" artifact-id "/pom.properties")
-     :write-fn (fn [os] (maven/store-pom-properties os pom-properties nil))}))
+     :write-fn (fn [os] (pom/store-pom-properties os pom-properties nil))}))
 
 
 (defn deps-edn-operation
@@ -209,7 +210,7 @@
                                   io/emacs-backups-exclusion-predicate]}
      :as   options}]
    (let [[lib maven-coords] (if (and pom-path (u.jio/file? pom-path))
-                              (let [pom (maven/read-pom pom-path)]
+                              (let [pom (pom/read-pom pom-path)]
                                 [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
                                  (update maven-coords :mvn/version #(or % (.getVersion pom)))])
                               [lib maven-coords])
@@ -229,7 +230,7 @@
        (check-non-maven-dependencies deps-map))
      (with-open [jarfs (util.jar/getjarfs out-path)]
        (let [the-manifest   (util.jar/create-manifest main manifest)
-             pom-properties (or pom-properties (maven/make-pom-properties lib maven-coords))]
+             pom-properties (or pom-properties (pom/make-pom-properties lib maven-coords))]
          (io/do-operations
            (u.jio/path jarfs)
            (transduce
@@ -269,7 +270,7 @@
      :or   {exclusion-predicates [io/dotfiles-exclusion-predicate
                                   io/emacs-backups-exclusion-predicate]}
      :as   options}]
-   (let [pom          (maven/read-pom pom-path)
+   (let [pom          (pom/read-pom pom-path)
          artifact-id  (.getArtifactId pom)
          group-id     (.getGroupId pom)
          maven-coords (update maven-coords :mvn/version #(or % (.getVersion pom)))
@@ -287,7 +288,7 @@
        (check-non-maven-dependencies deps-map))
      (with-open [jarfs (util.jar/getjarfs out-path)]
        (let [the-manifest   (util.jar/create-manifest main manifest)
-             pom-properties (or pom-properties (maven/make-pom-properties (keyword group-id artifact-id) maven-coords))]
+             pom-properties (or pom-properties (pom/make-pom-properties (keyword group-id artifact-id) maven-coords))]
          (io/do-operations
            (u.jio/path jarfs)
            (transduce

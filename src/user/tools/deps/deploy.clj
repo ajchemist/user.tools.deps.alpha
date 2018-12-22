@@ -4,6 +4,7 @@
    [clojure.java.io :as jio]
    [clojure.tools.deps.alpha.util.maven :as util.maven]
    [clojure.tools.deps.alpha.util.io :refer [printerrln]]
+   [user.apache.maven.pom.alpha :as pom]
    [user.tools.deps.maven.alpha :as maven]
    )
   (:import
@@ -119,7 +120,7 @@
          session        (with-redefs [util.maven/console-listener console-listener]
                           (util.maven/make-session system util.maven/default-local-repo))
          [lib version]  (if-let [pom-path (some (fn [{:keys [file-path]}] (when (str/ends-with? file-path "pom.xml") file-path)) artifacts)]
-                          (let [pom (maven/read-pom pom-path)]
+                          (let [pom (pom/read-pom pom-path)]
                             [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
                              (or version (.getVersion pom))])
                           [lib version])
