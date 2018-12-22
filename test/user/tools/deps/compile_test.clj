@@ -25,8 +25,9 @@
 
 
   ;;
-  (clean/clean "target/classes")
-  (compile #{'user.tools.deps.compile-test.a} "target/classes" nil nil)
+  (binding [*compile-path* "target/classes"]
+    (clean/clean *compile-path*)
+    (compile #{'user.tools.deps.compile-test.a}))
   (is (u.jio/file? "target/classes/user/java/io/alpha__init.class"))
 
 
