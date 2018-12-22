@@ -208,23 +208,23 @@
      :or   {exclusion-predicates [io/dotfiles-exclusion-predicate
                                   io/emacs-backups-exclusion-predicate]}
      :as   options}]
-   (let [[lib version] (if (and pom-path (u.jio/file? pom-path))
-                         (let [pom (maven/read-pom pom-path)]
-                           [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
-                            (update maven-coords :mvn/version #(or % (.getVersion pom)))])
-                         [lib maven-coords])
-         artifact-id   (name lib)
-         group-id      (or (namespace lib) artifact-id)
-         target-path   (u.jio/path (or target-path "target"))
-         out-path      (u.jio/path (or out-path
-                                       (and jarname (u.jio/path-resolve target-path jarname))
-                                       (make-jarpath artifact-id maven-coords target-path)))
-         _             (when-not (str/ends-with? (str out-path) ".jar")
-                         (throw
-                           (ex-info "out-path must be a jar file"
-                             {:out-path out-path})))
-         deps-map      (or deps-map (u.deps/deps-map))
-         paths         (or paths (:paths deps-map))]
+   (let [[lib maven-coords] (if (and pom-path (u.jio/file? pom-path))
+                              (let [pom (maven/read-pom pom-path)]
+                                [(or lib (symbol (.getGroupId pom) (.getArtifactId pom)))
+                                 (update maven-coords :mvn/version #(or % (.getVersion pom)))])
+                              [lib maven-coords])
+         artifact-id        (name lib)
+         group-id           (or (namespace lib) artifact-id)
+         target-path        (u.jio/path (or target-path "target"))
+         out-path           (u.jio/path (or out-path
+                                            (and jarname (u.jio/path-resolve target-path jarname))
+                                            (make-jarpath artifact-id maven-coords target-path)))
+         _                  (when-not (str/ends-with? (str out-path) ".jar")
+                              (throw
+                                (ex-info "out-path must be a jar file"
+                                  {:out-path out-path})))
+         deps-map           (or deps-map (u.deps/deps-map))
+         paths              (or paths (:paths deps-map))]
      (when-not allow-all-dependencies?
        (check-non-maven-dependencies deps-map))
      (with-open [jarfs (util.jar/getjarfs out-path)]
