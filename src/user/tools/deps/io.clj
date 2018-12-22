@@ -20,6 +20,9 @@
 ;; * clash
 
 
+(def ^:dynamic *clash-verbose* false)
+
+
 (defn clash-strategy
   [target]
   (let [^String entry-name (str target)]
@@ -37,8 +40,9 @@
 
 (defmethod clash :default
   [src target]
-  (println "Clash appeared, do nothing -" (str target))
-  ;; do nothing, first entry wins
+  (when *clash-verbose*
+    (println "Clash appeared, do nothing -" (str target)))
+  ;; do nothing special, first entry wins
   )
 
 

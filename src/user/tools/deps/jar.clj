@@ -107,6 +107,7 @@
 
 
 (def ^:dynamic *exclude-already-compiled* true)
+(def ^:dynamic *already-compiled-predicate-verbose* false)
 
 
 (defn- copy-jar-entry-exclusion-predicates
@@ -119,7 +120,8 @@
           (str/ends-with? entry-name ".clj")
           (util.compile/path-already-compiled? (subs entry-name 0 (str/last-index-of entry-name ".clj")))
           (do
-            (println "Already compiled:" entry-name)
+            (when *already-compiled-predicate-verbose*
+              (println "Already compiled:" entry-name))
             true))))
     jar-entry-exclusion-predicates))
 
