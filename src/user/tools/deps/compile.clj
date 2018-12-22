@@ -21,9 +21,6 @@
 (set! *warn-on-reflection* true)
 
 
-(def ^:const CLASSES_PATH "target/classes")
-
-
 (def ^:dynamic *main-ns* 'user.tools.deps.compile)
 
 
@@ -48,12 +45,12 @@
   "AOT compile one or several Clojure namespace(s). Dependencies of the compiled namespaces are
   always AOT compiled too. Namespaces are loaded while beeing compiled so beware of side effects.
   - namespaces: A symbol or a collection of symbols naming one or several Clojure namespaces.
-  - compile-path: The path to the directory where .class files are emitted. Default to `CLASSES_PATH`.
+  - compile-path: The path to the directory where .class files are emitted. Default to `*compile-path*`.
   - compiler-options: A map with the same format than clojure.core/*compiler-options*."
   ([namespaces]
    (compile namespaces nil nil nil))
   ([namespaces compile-path classpath compiler-options]
-   (let [compile-path   (or compile-path CLASSES_PATH)
+   (let [compile-path   (or compile-path *compile-path*)
          compile-path   (io/mkdir compile-path)
          ;; We must ensure early that the compile-path exists otherwise the Clojure Compiler has issues compiling classes / loading classes. I'm not sure why exactly
          classpath      (or classpath (System/getProperty "java.class.path"))
