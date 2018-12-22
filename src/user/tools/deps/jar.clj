@@ -104,17 +104,8 @@
          #"(?i)META-INF/(?:INDEX\.LIST|DEPENDENCIES|NOTICE|LICENSE)(?:\.txt|\.md|\.html)?"])))
 
 
-(defn dotfiles-exclusion-predicate
-  [{:keys [path]}]
-  (let [path (u.jio/path path)]
-    (.startsWith path ".")))
 
 
-(defn emacs-backups-exclusion-predicate
-  [{:keys [path]}]
-  (let [path (u.jio/path path)]
-    (or (.endsWith path "~")
-        (.startsWith path "#"))))
 
 
 ;; * uber
@@ -184,8 +175,8 @@
             extra-operations
             exclusion-predicates
             allow-all-dependencies?]
-     :or   {exclusion-predicates [dotfiles-exclusion-predicate
-                                  emacs-backups-exclusion-predicate]}
+     :or   {exclusion-predicates [io/dotfiles-exclusion-predicate
+                                  io/emacs-backups-exclusion-predicate]}
      :as   options}]
    (let [[lib version] (if (and pom-path (u.jio/file? pom-path))
                          (let [pom (maven/read-pom pom-path)]
@@ -245,8 +236,8 @@
             extra-operations
             exclusion-predicates
             allow-all-dependencies?]
-     :or   {exclusion-predicates [dotfiles-exclusion-predicate
-                                  emacs-backups-exclusion-predicate]}
+     :or   {exclusion-predicates [io/dotfiles-exclusion-predicate
+                                  io/emacs-backups-exclusion-predicate]}
      :as   options}]
    (let [pom          (maven/read-pom pom-path)
          artifact-id  (.getArtifactId pom)

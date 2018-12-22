@@ -103,6 +103,25 @@
 ;; * batch operation
 
 
+;; ** predicate
+
+
+(defn dotfiles-exclusion-predicate
+  [{:keys [path]}]
+  (let [path (u.jio/path path)]
+    (.startsWith path ".")))
+
+
+(defn emacs-backups-exclusion-predicate
+  [{:keys [path]}]
+  (let [path (u.jio/path path)]
+    (or (.endsWith path "~")
+        (.startsWith path "#"))))
+
+
+;; ** do operation
+
+
 (defn- do-copy-operation
   [^Path dest-path {:keys [src path] :as operation}]
   (let [target (u.jio/path-resolve dest-path path)]
@@ -128,7 +147,7 @@
     operations))
 
 
-;; * operation sift fns
+;; ** operation sift fns
 
 
 (defn sift-add-paths
@@ -158,7 +177,7 @@
 
 
 (defn sift-add-jar
-  [operations jarpath re]
+  [operations ^String jarpath re]
   (let [jarfile (JarFile. jarpath)]
     (transduce
       (comp
