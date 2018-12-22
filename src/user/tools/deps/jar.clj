@@ -117,7 +117,10 @@
       (fn [^String entry-name]
         (and
           (str/ends-with? entry-name ".clj")
-          (util.compile/path-already-compiled? (subs entry-name 0 (str/last-index-of entry-name ".clj"))))))
+          (util.compile/path-already-compiled? (subs entry-name 0 (str/last-index-of entry-name ".clj")))
+          (do
+            (println "Already compiled:" entry-name)
+            true))))
     jar-entry-exclusion-predicates))
 
 
