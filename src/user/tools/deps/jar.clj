@@ -112,7 +112,12 @@
 (defn- copy-jar-entry-exclusion-predicates
   []
   (if *exclude-already-compiled*
-    (conj jar-entry-exclusion-predicates util.compile/path-already-compiled?)
+    (conj
+      jar-entry-exclusion-predicates
+      (fn [^String entry-name]
+        (and
+          (str/ends-with? entry-name ".clj")
+          (util.compile/path-already-compiled? (subs entry-name 0 (str/last-index-of entry-name ".clj"))))))
     jar-entry-exclusion-predicates))
 
 
