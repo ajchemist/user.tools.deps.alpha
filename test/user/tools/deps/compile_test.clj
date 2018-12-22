@@ -7,6 +7,7 @@
    [clojure.tools.namespace.find :as ns.find]
    [clojure.tools.namespace.file]
    [user.java.io.alpha :as u.jio]
+   [user.tools.deps.util.compile :as util.compile]
    [user.tools.deps.clean :as clean]
    [user.tools.deps.alpha :as u.deps]
    [user.tools.deps.compile :refer :all]
@@ -19,16 +20,16 @@
   (u.jio/mkdir "target/classes")
   (binding [*compile-path*     "target/classes"
             *compiler-options* {}]
-    (run! clojure.core/compile #{'user.tools.deps.compile-test.a}))
-  (is (u.jio/file? "target/classes/user/tools/deps/compile_test/a__init.class"))
-  (is (not (u.jio/file? "target/classes/user/java/io/alpha__init.class")))
+    (run! clojure.core/compile #{'user.tools.deps.compile-test.a})
+    (is (util.compile/lib-already-compiled? 'user.tools.deps.compile-test.a))
+    (is (not (util.compile/lib-already-compiled? 'user.java.io.alpha))))
 
 
   ;;
   (binding [*compile-path* "target/classes"]
     (clean/clean *compile-path*)
-    (compile #{'user.tools.deps.compile-test.a}))
-  (is (u.jio/file? "target/classes/user/java/io/alpha__init.class"))
+    (compile #{'user.tools.deps.compile-test.a})
+    (is (util.compile/lib-already-compiled? 'user.java.io.alpha)))
 
 
   ;;
