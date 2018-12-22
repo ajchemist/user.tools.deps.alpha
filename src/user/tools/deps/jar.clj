@@ -93,19 +93,47 @@
 ;; * predicate
 
 
-(defn entry-excluded?
-  [^String entry-name]
-  (or (str/starts-with? entry-name "META-INF/leiningen")
-      (str/starts-with? entry-name "META-INF/user.tools.deps.alpha")
-      (some
-        #(re-matches % entry-name)
-        [#"(?i)(?:AUTHOR|LICENSE|COPYRIGHT)(?:\..*)?"
-         #"(?i)META-INF/.*\.(?:MF|SF|RSA|DSA)"
-         #"(?i)META-INF/(?:INDEX\.LIST|DEPENDENCIES|NOTICE|LICENSE)(?:\.txt|\.md|\.html)?"])))
+;; ** uber
 
 
+(def jar-entry-exclusion-predicates
+  [#(str/starts-with? % "META-INF/leiningen")
+   #(str/starts-with? % "META-INF/user.tools.deps.alpha")
+   #(re-matches #"(?i)(?:AUTHOR|LICENSE|COPYRIGHT)(?:\..*)?" %)
+   #(re-matches #"(?i)META-INF/.*\.(?:MF|SF|RSA|DSA)" %)
+   #(re-matches #"(?i)META-INF/(?:INDEX\.LIST|DEPENDENCIES|NOTICE|LICENSE)(?:\.txt|\.md|\.html)?" %)])
 
 
+(def ^:dynamic *exclude-already-compiled* true)
+
+
+(def root-resource (var-get #'clojure.core/root-resource))
+
+
+(defn path-already-compiled?
+  [path]
+  (let [clj-path      (str path ".clj")
+        class-path    (str path "__init.class")
+        loader        (clojure.lang.RT/baseLoader)
+        compiled-file (jio/file (str *compile-path* "/" class-path))
+        clj-url       (jio/resource clj-path loader)]
+    (or (and (.exists compiled-file)
+             (or (nil? clj-url)
+                 (> (clojure.lang.RT/lastModified (jio/as-url compiled-file) class-path)
+                    (clojure.lang.RT/lastModified clj-url clj-path))))
+        (jio/resource class-path loader))))
+
+
+(defn lib-already-compiled?
+  [lib]
+  (path-already-compiled? (subs (root-resource lib) 1)))
+
+
+(defn- copy-jar-entry-exclusion-predicates
+  []
+  (if *exclude-already-compiled*
+    (conj jar-entry-exclusion-predicates path-already-compiled?)
+    jar-entry-exclusion-predicates))
 
 
 ;; * uber
@@ -115,13 +143,14 @@
   [jarpath ^Path dest-path]
   (io/consume-jar
     (str jarpath)
-    (fn [is ^JarEntry entry]
-      (let [entry-name (.getName entry)
-            target     (.resolve dest-path entry-name)]
-        (if (.isDirectory entry)
-          (u.jio/mkdir target)
-          (when-not (entry-excluded? entry-name)
-            (io/copy! is (doto target (u.jio/mkparents)))))))))
+    (let [entry-exclusion-predicates (copy-jar-entry-exclusion-predicates)]
+      (fn [is ^JarEntry entry]
+        (let [entry-name (.getName entry)
+              target     (.resolve dest-path entry-name)]
+          (if (.isDirectory entry)
+            (u.jio/mkdir target)
+            (when-not (some #(% entry-name) entry-exclusion-predicates)
+              (io/copy! is (doto target (u.jio/mkparents))))))))))
 
 
 (defn copy-directory
@@ -131,7 +160,8 @@
       src-path
       (u.jio/make-file-visitor
         (fn [[path attr]]
-          (io/copy! path (doto (.resolve dest-path (str (.relativize src-path path))) (u.jio/mkparents))))))))
+          (let [entry-name (str (.relativize src-path path))]
+            (io/copy! path (doto (.resolve dest-path entry-name) (u.jio/mkparents)))))))))
 
 
 (defn uber-classpath
