@@ -50,27 +50,28 @@
   ([namespaces]
    (compile namespaces nil nil nil))
   ([namespaces compile-path classpath compiler-options]
-   (let [compile-path   (or compile-path *compile-path*)
-         compile-path   (io/mkdir compile-path)
+   (let [compile-path     (or compile-path *compile-path*)
+         compile-path     (io/mkdir compile-path)
+         compiler-options (or compiler-options *compiler-options*)
          ;; We must ensure early that the compile-path exists otherwise the Clojure Compiler has issues compiling classes / loading classes. I'm not sure why exactly
-         classpath      (or classpath (System/getProperty "java.class.path"))
-         classpath-urls (->> classpath classpath->paths paths->urls (into-array URL))
+         classpath        (or classpath (System/getProperty "java.class.path"))
+         classpath-urls   (->> classpath classpath->paths paths->urls (into-array URL))
          ;; classpath isolation
-         classloader    (URLClassLoader. classpath-urls (.getParent (ClassLoader/getSystemClassLoader)))
-         main-ns        *main-ns*
-         main-class     (.loadClass classloader "clojure.main")
-         main-method    (.getMethod main-class "main" (into-array Class [(Class/forName "[Ljava.lang.String;")]))
-         t              (Thread.
-                          (fn []
-                            (.setContextClassLoader (Thread/currentThread) classloader)
-                            (.invoke
-                              main-method
-                              nil
-                              (into-array
-                                Object
-                                [(into-array String
-                                   ["--main" (str main-ns)
-                                    (pr-str namespaces) (str compile-path) (pr-str compiler-options)])]))))]
+         classloader      (URLClassLoader. classpath-urls (.getParent (ClassLoader/getSystemClassLoader)))
+         main-ns          *main-ns*
+         main-class       (.loadClass classloader "clojure.main")
+         main-method      (.getMethod main-class "main" (into-array Class [(Class/forName "[Ljava.lang.String;")]))
+         t                (Thread.
+                            (fn []
+                              (.setContextClassLoader (Thread/currentThread) classloader)
+                              (.invoke
+                                main-method
+                                nil
+                                (into-array
+                                  Object
+                                  [(into-array String
+                                     ["--main" (str main-ns)
+                                      (pr-str namespaces) (str compile-path) (pr-str compiler-options)])]))))]
      (.start t)
      (.join t)
      (.close classloader))))
@@ -87,7 +88,7 @@
       (binding [clojure.core/*loaded-libs* (ref (sorted-set))
                 *compile-path*             (str compile-path)
                 *compiler-options*         (or compiler-options *compiler-options*)
-                *assert*                   (or (:assert *compiler-options*) *assert*)]
+                *assert*                   (:assert compiler-options *assert*)]
         (run! clojure.core/compile namespaces))
       (clojure.core/shutdown-agents)
       (catch Throwable e

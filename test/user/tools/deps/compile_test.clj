@@ -11,6 +11,9 @@
    [user.tools.deps.clean :as clean]
    [user.tools.deps.alpha :as u.deps]
    [user.tools.deps.compile :refer :all]
+   )
+  (:import
+   java.io.File
    ))
 
 
@@ -35,6 +38,54 @@
   ;;
   (clean/clean "target/classes")
   )
+
+
+(defn- file-length
+  [^File f]
+  {:pre [(.isFile f)]}
+  (.length f))
+
+
+(deftest assert
+  (clean/clean "target/compile-test/assert")
+  (u.jio/mkdir "target/compile-test/assert")
+  (binding [*compile-path* "target/compile-test/assert"]
+    (clojure.core/compile 'user.tools.deps.compile-test.assert))
+
+
+  (clean/clean "target/compile-test/noassert")
+  (u.jio/mkdir "target/compile-test/noassert")
+  (binding [*assert*       false
+            *compile-path* "target/compile-test/noassert"]
+    (clojure.core/compile 'user.tools.deps.compile-test.assert))
+
+
+  (is
+    (<
+      (file-length (jio/file "target/compile-test/noassert/user/tools/deps/compile_test/assert$f.class"))
+      (file-length (jio/file "target/compile-test/assert/user/tools/deps/compile_test/assert$f.class"))))
+  )
+
+
+(deftest assert-2
+  (clean/clean "target/compile-test/assert")
+  (u.jio/mkdir "target/compile-test/assert")
+  (binding [*compile-path* "target/compile-test/assert"]
+    (compile '[user.tools.deps.compile-test.assert]))
+
+
+  (clean/clean "target/compile-test/noassert")
+  (u.jio/mkdir "target/compile-test/noassert")
+  (binding [*compiler-options* {:assert false}
+            *compile-path*     "target/compile-test/noassert"]
+    (compile '[user.tools.deps.compile-test.assert]
+             nil nil {:assert false}))
+
+
+  (is
+    (<
+      (file-length (jio/file "target/compile-test/noassert/user/tools/deps/compile_test/assert$f.class"))
+      (file-length (jio/file "target/compile-test/assert/user/tools/deps/compile_test/assert$f.class")))))
 
 
 (comment
