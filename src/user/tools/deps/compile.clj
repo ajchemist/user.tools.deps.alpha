@@ -86,7 +86,8 @@
     (try
       (binding [clojure.core/*loaded-libs* (ref (sorted-set))
                 *compile-path*             (str compile-path)
-                *compiler-options*         (or compiler-options *compiler-options*)]
+                *compiler-options*         (or compiler-options *compiler-options*)
+                *assert*                   (or (:assert *compiler-options*) *assert*)]
         (run! clojure.core/compile namespaces))
       (clojure.core/shutdown-agents)
       (catch Throwable e
