@@ -21,20 +21,20 @@
 (set! *warn-on-reflection* true)
 
 
-(def ^:dynamic *target-path* "target")
-(def ^:dynamic ^String *jar-path* "package.jar")
+(def ^:dynamic *target-path*)
+(def ^:dynamic *jar-path*)
 
 
 (def cli-options
   [["-r" "--library LIBRARY" "Library symbol"
     :parse-fn symbol]
    ["-d" "--dir TARGET_DIR" "Package target directory"
-    :default *target-path*
+    :default "target"
     :validate-fn [string? "Target path must be a string"]]
    ["-t" "--version VERSION" "Package version string"
     :default (chrono-version/chrono-version-str)]
    [nil "--jar-path JAR_FILE" "Package jar file path"
-    :default *jar-path*]])
+    :default "package.jar"]])
 
 
 (defn package
@@ -55,7 +55,8 @@
 
 (defn -main
   [& xs]
-  (let [{:keys [dir library version jar-path]} (cli/parse-opts xs cli-options)]
+  (let [{{:keys [dir library version jar-path]} :options
+         :as                                    parsed-opts} (cli/parse-opts xs cli-options)]
     (try
       (binding [*target-path* dir
                 *jar-path*    jar-path]
@@ -69,3 +70,8 @@
 
 
 (set! *warn-on-reflection* false)
+
+
+(comment
+  (cli/parse-opts [] cli-options)
+  )
