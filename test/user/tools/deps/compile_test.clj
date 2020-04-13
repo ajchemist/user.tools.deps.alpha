@@ -46,7 +46,7 @@
   (.length f))
 
 
-(deftest assert
+(deftest assert-1
   (clean/clean "target/compile-test/assert")
   (u.jio/mkdir "target/compile-test/assert")
   (binding [*compile-path* "target/compile-test/assert"]

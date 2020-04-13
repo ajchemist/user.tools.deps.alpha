@@ -14,10 +14,10 @@
 
 
 (deftest main
-
-
-  (is (nil? (str/index-of (make-classpath) "tools.deps.alpha")))
-  (is (int? (str/index-of (make-classpath {:resolve-aliases [:provided]}) "tools.deps.alpha")))
+  ;; aliases :provided deps not included
+  (is (nil? (str/index-of (make-classpath) "clojure/tools.deps.alpha")))
+  ;; :provided deps included
+  (is (int? (str/index-of (make-classpath {:resolve-aliases [:provided]}) "clojure/tools.deps.alpha")))
 
 
   )

@@ -44,5 +44,9 @@
 
 
 (comment
-  (deps.reader/read-deps (:config-files (deps.reader/clojure-env)))
+  (deps.reader/read-deps [])
+  (deps.reader/read-deps (rest (deps.reader/default-deps)))
+  (deps.make-classpath/create-classpath {:deps {}} {})
+  (deps.make-classpath/create-classpath (deps.reader/read-deps []) {})
+  (deps.make-classpath/create-classpath '{:deps {org.clojure/clojure {:mvn/version "1.10.1"}}} {})
   )
