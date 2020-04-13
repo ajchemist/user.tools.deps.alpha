@@ -4,9 +4,10 @@ language: java
 
 
 jdk:
-  - oraclejdk8
-  - oraclejdk11
+  - openjdk11
   - openjdk8
+  - oraclejdk11
+  - oraclejdk8
 
 
 env:
@@ -46,7 +47,7 @@ jobs:
         - git config --local user.name "aJchemist"
         - git config --local user.email "1694505+aJchemist@users.noreply.github.com"
         - eval $(ssh-agent -s)
-        - ssh-add <(openssl aes-256-cbc -K $encrypted_bb04bbf06205_key -iv $encrypted_bb04bbf06205_iv -in .ci/deploy_key.enc -d)
+        - ssh-add <(openssl aes-256-cbc -K $encrypted_649e4f99606f_key -iv $encrypted_649e4f99606f_iv -in .ci/deploy-key.enc -d)
         - mkdir -p ~/.ssh
         - chmod 700 ~/.ssh
         - ssh-keyscan github.com >> ~/.ssh/known_hosts
