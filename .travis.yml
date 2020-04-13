@@ -9,14 +9,14 @@ jdk:
 
 env:
   matrix:
-    - TESTOPT="-R:1.9 -A:provided:test"
-    - TESTOPT="-R:1.10 -A:provided:test"
+    - TESTOPT="-R:1.9 -A:provided:test:test-runner"
+    - TESTOPT="-R:1.10 -A:provided:test:test-runner"
 
 
 install:
-  - curl -LO https://download.clojure.org/install/linux-install-1.9.0.397.sh
-  - chmod +x linux-install-1.9.0.397.sh
-  - sudo ./linux-install-1.9.0.397.sh
+  - curl -LO https://download.clojure.org/install/linux-install-1.10.1.536.sh
+  - chmod +x linux-install-1.10.1.536.sh
+  - sudo ./linux-install-1.10.1.536.sh
   - export PATH=/usr/local/bin:$PATH
   - which gpg
   - which mvn
@@ -29,7 +29,7 @@ cache:
     - $HOME/.gitlibs
 
 
-script: clojure $TESTOPT -m cognitect.test-runner
+script: clojure $TESTOPT
 
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
     - stage: package
       jdk: openjdk8
       env: TESTOPT=""
-      script: clojure -R:1.9 -A:provided:test -m script.package
+      script: clojure -R:1.10 -A:provided:test -m user.tools.deps.script.package -r user.tools.deps.alpha
       before_cache:
         - mvn dependency:get -Dartifact=org.apache.maven.plugins:maven-deploy-plugin:2.8
       after_success:
@@ -51,7 +51,7 @@ jobs:
         - chmod 644 ~/.ssh/known_hosts
         - git checkout master
         - git add -u -- pom.xml
-        - git commit -m "$(clojure -R:1.9 -A:provided:test -m script.extra -- get-version) [ci skip]"
+        - git commit -m "$(clojure -R:1.10 -A:provided:test -m script.extra -- get-version) [ci skip]"
         - git remote add origin-ssh "git@github.com:aJchemist/user.tools.deps.alpha.git"
         - git remote -v
         - git push -v -u origin-ssh master:refs/heads/master
