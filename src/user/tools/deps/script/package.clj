@@ -2,10 +2,6 @@
   (:require
    [clojure.java.io :as jio]
    [clojure.tools.cli :as cli]
-   [clojure.tools.deps.alpha :as deps]
-   [clojure.tools.deps.alpha.reader :as deps.reader]
-   [clojure.tools.deps.alpha.extensions :as deps.ext]
-   [clojure.tools.deps.alpha.extensions.git :as deps.git]
    [user.java.io.alpha :as u.jio]
    [user.tools.deps.maven.alpha :as maven]
    [user.tools.deps.clean :as clean]
@@ -14,7 +10,7 @@
    [user.java.time.script.print-chrono-version :as chrono-version]
    )
   (:import
-   java.nio.file.Path
+   ;; java.nio.file.Path
    ))
 
 

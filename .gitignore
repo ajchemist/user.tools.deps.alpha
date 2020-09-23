@@ -1,4 +1,6 @@
 /.cpcache
+.nrepl-port
+.clj-kondo/.cache
 /target
 deploy-key
 deploy-key.pub
