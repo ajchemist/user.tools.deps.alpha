@@ -4,17 +4,16 @@
    [clojure.string :as str]
    [clojure.java.io :as jio]
    [user.java.io.alpha :as io]
-   [user.tools.deps.alpha :as u.deps]
    )
   (:import
    java.io.File
-   java.net.URI
+   ;; java.net.URI
    java.net.URL
    java.net.URLClassLoader
-   java.nio.file.Files
-   java.nio.file.Path
-   java.nio.file.Paths
-   java.nio.file.attribute.FileAttribute
+   ;; java.nio.file.Files
+   ;; java.nio.file.Path
+   ;; java.nio.file.Paths
+   ;; java.nio.file.attribute.FileAttribute
    ))
 
 

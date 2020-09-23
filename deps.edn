@@ -1,15 +1,17 @@
 {:paths ["src"]
  :deps
  {
-  user.java.io            {:mvn/version "2018.301.48672"}
-  user.apache.maven.alpha {:mvn/version "2020.104.34142"}
+  org.clojure/tools.deps.alpha {:mvn/version "0.9.799"}
+
+
+  user.java.io/user.java.io                       {:mvn/version "2018.301.48672"}
+  user.apache.maven.alpha/user.apache.maven.alpha {:mvn/version "2020.104.34142"}
   }
  :aliases
  {
   :provided
   {:extra-deps
    {
-    org.clojure/tools.deps.alpha {:mvn/version "0.9.799"}
     }}
 
 
@@ -17,8 +19,9 @@
   {:extra-paths ["test"]
    :extra-deps
    {
-    org.clojure/tools.cli {:mvn/version "1.0.194"}
-    user.java.time        {:git/url "https://github.com/aJchemist/user.java.time.git" :sha "3a41c91dbc37a6109500185d04299d4a9cf9fa80"}
+    org.clojure/tools.cli         {:mvn/version "1.0.194"}
+    org.clojure/tools.namespace   {:mvn/version "1.0.0"}
+    user.java.time/user.java.time {:git/url "https://github.com/aJchemist/user.java.time.git" :sha "3a41c91dbc37a6109500185d04299d4a9cf9fa80"}
     }}
 
 

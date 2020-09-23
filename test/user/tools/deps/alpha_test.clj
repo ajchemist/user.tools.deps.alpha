@@ -4,8 +4,7 @@
    [clojure.test :as test :refer [deftest is are testing]]
    [clojure.tools.deps.alpha.util.maven :as util.maven]
    [clojure.tools.deps.alpha :as deps]
-   [clojure.tools.deps.alpha.reader :as deps.reader]
-   [user.tools.deps.alpha :refer :all]
+   [user.tools.deps.alpha :as u.deps]
    )
   (:import
    java.io.File
@@ -31,7 +30,8 @@
   (str/split (make-classpath) (re-pattern File/pathSeparator))
 
 
-  (deps-map)
+  (u.deps/project-deps-edn)
+
 
   (update (deps.reader/read-deps ["deps.edn"]) :mvn/repos
     #(merge %2 %)

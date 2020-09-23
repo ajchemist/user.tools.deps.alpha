@@ -4,21 +4,16 @@
    [clojure.java.io :as jio]
    [clojure.tools.deps.alpha.util.maven :as mvn]
    [clojure.tools.deps.alpha :as deps]
-   [clojure.tools.deps.alpha.reader :as deps.reader]
-   [clojure.tools.deps.alpha.script.make-classpath :as deps.make-classpath]
    ))
 
 
 (set! *warn-on-reflection* true)
 
 
-(defn- -deps-map
+(defn project-deps-edn
   []
-  (update (deps.reader/slurp-deps "deps.edn")
-    :mvn/repos #(merge %2 %) mvn/standard-repos))
-
-
-(defn deps-map [] (-deps-map))
+  (let [{:keys [project-edn]} (deps/find-edn-maps)]
+    (deps/merge-edns [{:mvn/repos mvn/standard-repos} project-edn])))
 
 
 (defn make-classpath
@@ -27,9 +22,13 @@
    (make-classpath nil))
   ([opts]
    (make-classpath nil opts))
-  ([deps-map {:keys [resolve-aliases makecp-aliases aliases] :as opts}]
-   (let [deps-map (or deps-map (-deps-map))]
-     (:classpath (deps.make-classpath/create-classpath deps-map opts)))))
+  ([deps-map alias-kws]
+   (let [merged   (or deps-map (project-deps-edn))
+         args-map (deps/combine-aliases merged alias-kws)
+         ;; lib-map  (deps/resolve-deps merged args-map)
+         ]
+     #_(deps/make-classpath lib-map (:paths merged) args-map)
+     (-> (deps/calc-basis merged args-map) :classpath-roots deps/join-classpath))))
 
 
 (defn get-jarpath
@@ -44,9 +43,5 @@
 
 
 (comment
-  (deps.reader/read-deps [])
-  (deps.reader/read-deps (rest (deps.reader/default-deps)))
-  (deps.make-classpath/create-classpath {:deps {}} {})
-  (deps.make-classpath/create-classpath (deps.reader/read-deps []) {})
-  (deps.make-classpath/create-classpath '{:deps {org.clojure/clojure {:mvn/version "1.10.1"}}} {})
+  (make-classpath)
   )

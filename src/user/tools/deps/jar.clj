@@ -3,11 +3,9 @@
    [clojure.string :as str]
    [clojure.java.io :as jio]
    [user.java.io.alpha :as u.jio]
-   [clojure.tools.deps.alpha.reader :as deps.reader]
    [user.apache.maven.pom.alpha :as pom]
    [user.tools.deps.io :as io]
    [user.tools.deps.alpha :as u.deps]
-   [user.tools.deps.maven.alpha :as maven]
    [user.tools.deps.util.compile :as util.compile]
    [user.tools.deps.util.jar :as util.jar]
    )
@@ -220,7 +218,7 @@
                               (throw
                                 (ex-info "out-path must be a jar file"
                                   {:out-path out-path})))
-         deps-map           (or deps-map (u.deps/deps-map))
+         deps-map           (or deps-map (u.deps/project-deps-edn))
          paths              (or paths (:paths deps-map))]
      (when-not allow-all-dependencies?
        (check-non-maven-dependencies deps-map))
@@ -278,7 +276,7 @@
                         (throw
                           (ex-info "out-path must be a jar file"
                             {:out-path out-path})))
-         deps-map     (or deps-map (deps.reader/read-deps ["deps.edn"]))
+         deps-map     (or deps-map (u.deps/project-deps-edn))
          paths        (or paths (:paths deps-map))]
      (when-not allow-all-dependencies?
        (check-non-maven-dependencies deps-map))

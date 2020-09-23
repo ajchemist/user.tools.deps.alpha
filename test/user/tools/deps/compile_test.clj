@@ -3,14 +3,13 @@
   (:require
    [clojure.java.io :as jio]
    [clojure.test :as test :refer [deftest is are testing]]
-   [clojure.tools.deps.alpha :as deps]
    [clojure.tools.namespace.find :as ns.find]
    [clojure.tools.namespace.file]
    [user.java.io.alpha :as u.jio]
    [user.tools.deps.util.compile :as util.compile]
    [user.tools.deps.clean :as clean]
    [user.tools.deps.alpha :as u.deps]
-   [user.tools.deps.compile :refer :all]
+   [user.tools.deps.compile :as u.compile :refer :all]
    )
   (:import
    java.io.File
@@ -123,8 +122,11 @@
     #{'datascript.db}
     nil
     (u.deps/make-classpath
-      (update (u.deps/deps-map) :deps merge '{datascript {:mvn/version "0.16.6"}})
-      {:resolve-aliases [:test]})
+      (update (u.deps/project-deps-edn)
+        :deps merge
+        '{org.clojure/clojure {:mvn/version "1.10.1"}
+          datascript          {:mvn/version "0.16.6"}})
+      [:test])
     {:direct-linking true})
 
 

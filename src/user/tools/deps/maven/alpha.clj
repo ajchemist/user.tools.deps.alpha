@@ -22,7 +22,7 @@
   ([lib mvn-coords deps-map]
    (sync-pom lib mvn-coords deps-map (jio/file ".")))
   ([lib {:keys [:mvn/version]} deps-map ^File dir]
-   (let [{:keys [deps paths :mvn/repos]} (or deps-map (u.deps/deps-map))
+   (let [{:keys [deps paths :mvn/repos]} (or deps-map (u.deps/project-deps-edn))
 
          artifact-id (name lib)
          group-id    (or (namespace lib) artifact-id)
