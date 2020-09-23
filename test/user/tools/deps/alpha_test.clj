@@ -14,11 +14,9 @@
 
 (deftest main
   ;; aliases :provided deps not included
-  (is (nil? (str/index-of (make-classpath) "clojure/tools.deps.alpha")))
+  (is (nil? (str/index-of (u.deps/make-classpath) "clojure/tools.namespace")))
   ;; :provided deps included
-  (is (int? (str/index-of (make-classpath {:resolve-aliases [:provided]}) "clojure/tools.deps.alpha")))
-
-
+  (is (int? (str/index-of (u.deps/make-classpath [:test]) "clojure/tools.namespace")))
   )
 
 
@@ -30,6 +28,7 @@
   (str/split (make-classpath) (re-pattern File/pathSeparator))
 
 
+  (deps/find-edn-maps)
   (u.deps/project-deps-edn)
 
 

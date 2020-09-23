@@ -20,15 +20,16 @@
   "- deps-map: Default to deps.edn map of the project (without merging the system-level and user-level deps.edn maps)"
   ([]
    (make-classpath nil))
-  ([opts]
-   (make-classpath nil opts))
+  ([alias-kws]
+   (make-classpath nil alias-kws))
   ([deps-map alias-kws]
    (let [merged   (or deps-map (project-deps-edn))
          args-map (deps/combine-aliases merged alias-kws)
          ;; lib-map  (deps/resolve-deps merged args-map)
          ]
      #_(deps/make-classpath lib-map (:paths merged) args-map)
-     (-> (deps/calc-basis merged args-map) :classpath-roots deps/join-classpath))))
+     (-> (deps/calc-basis merged {:resolve-args args-map :classpath-args args-map})
+       :classpath-roots deps/join-classpath))))
 
 
 (defn get-jarpath
