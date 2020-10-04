@@ -76,6 +76,11 @@
      (.close classloader))))
 
 
+(defn compile-x
+  [{:keys [namespaces compile-path classpath compiler-options]}]
+  (compile namespaces compile-path classpath compiler-options))
+
+
 ;;
 
 
@@ -102,7 +107,7 @@
 
   (compile
     '[user.tools.deps.alpha]
-    "target/classes"
+    nil
     nil
     {:elide-meta [:doc :file :line :added]})
 

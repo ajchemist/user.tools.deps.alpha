@@ -101,11 +101,16 @@
    (javac java-source-paths nil nil nil))
   ([java-source-paths compile-path classpath javac-options]
    (let [compiler     (ToolProvider/getSystemJavaCompiler)
-         compile-path (or compile-path "target/classes")
+         compile-path (or compile-path *compile-path*)
          classpath    (or classpath (u.deps/make-classpath))]
      (when (nil? compiler)
        (throw (ex-info "Java compiler not found" {})))
      (javac* compiler java-source-paths compile-path classpath javac-options))))
+
+
+(defn javac-x
+  [{:keys [source-paths compile-path classpath javac-options]}]
+  (javac source-paths compile-path classpath javac-options))
 
 
 (set! *warn-on-reflection* false)
@@ -114,7 +119,7 @@
 (comment
   (javac
     ["src-java"]
-    "target/classes"
+    *compile-path*
     nil
     ["-target" "1.6" "-source" "1.6" "-Xlint:-options"])
   )

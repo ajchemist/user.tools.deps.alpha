@@ -7,6 +7,7 @@
    )
   (:import
    java.io.File
+   org.apache.maven.model.Model
    ))
 
 
@@ -17,16 +18,17 @@
 
 
 (defn sync-pom
+  "Return `pom-file` path"
   ([lib mvn-coords]
    (sync-pom lib mvn-coords nil))
   ([lib mvn-coords deps-map]
    (sync-pom lib mvn-coords deps-map (jio/file ".")))
   ([lib {:keys [:mvn/version]} deps-map ^File dir]
-   (let [{:keys [deps paths :mvn/repos]} (or deps-map (u.deps/project-deps-edn))
+   (let [{:keys [deps paths :mvn/repos]} (or deps-map (u.deps/project-deps))
 
          artifact-id (name lib)
          group-id    (or (namespace lib) artifact-id)
-         repos       (remove #(str/starts-with? (-> % val :url) "https://repo1.maven.org") repos)
+         repos       (remove #(str/includes? (-> % val :url) "repo1.maven.org") repos)
          pom-file    (jio/file dir "pom.xml")
          pom         (if (.exists pom-file)
                        (-> (pom/read-pom pom-file)
@@ -39,8 +41,18 @@
      (str pom-file))))
 
 
+(defn sync-pom-x
+  "Sync pom file with a hash-map"
+  [{:keys [lib mvn-coords deps-map dir]}]
+  (sync-pom lib mvn-coords deps-map dir))
+
 
 ;; * artifact
+
+
+(defn get-library-from-pom
+  [^Model pom]
+  (symbol (.getGroupId pom) (.getArtifactId pom)))
 
 
 (defn artifact-with-default-extension

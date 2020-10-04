@@ -131,6 +131,11 @@
      (.deploy system session deploy-request))))
 
 
+(defn deploy-x
+  [{:keys [lib version artifacts repository options]}]
+  (deploy lib version artifacts repository options))
+
+
 (set! *warn-on-reflection* false)
 
 

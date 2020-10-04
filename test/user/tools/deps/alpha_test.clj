@@ -25,11 +25,11 @@
      (get-jarpath 'user.java.io {:mvn/version "2018.292.70200"}))
 
 
-  (str/split (make-classpath) (re-pattern File/pathSeparator))
+  (str/split (u.deps/make-classpath) (re-pattern File/pathSeparator))
 
 
   (deps/find-edn-maps)
-  (u.deps/project-deps-edn)
+  (u.deps/project-deps)
 
 
   (update (deps.reader/read-deps ["deps.edn"]) :mvn/repos
