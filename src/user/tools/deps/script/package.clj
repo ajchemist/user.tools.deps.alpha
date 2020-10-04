@@ -42,9 +42,10 @@
         (clean/clean target-path)
         (let [mvn-coords {:mvn/version version}
               pom-path   (maven/sync-pom library mvn-coords)
-              jarpath    (jar/maven-jar
-                           pom-path nil nil
-                           {:out-path (. (u.jio/as-path target-path) resolve jar-path)})]
+              jarpath    (jar/jar
+                           library nil nil
+                           {:pom-path pom-path
+                            :out-path (. (u.jio/as-path target-path) resolve jar-path)})]
           (println (str (install/install nil nil jarpath pom-path)))
           (println "\n- " version "\n"))))))
 

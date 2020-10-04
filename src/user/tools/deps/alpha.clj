@@ -10,7 +10,14 @@
 (set! *warn-on-reflection* true)
 
 
-(defn project-deps-edn
+(defn merged-deps
+  "Merges install, user, local deps.edn maps left-to-right."
+  []
+  (let [{:keys [install-edn user-edn project-edn]} (deps/find-edn-maps)]
+    (deps/merge-edns [install-edn user-edn project-edn])))
+
+
+(defn project-deps
   []
   (let [{:keys [project-edn]} (deps/find-edn-maps)]
     (deps/merge-edns [{:mvn/repos mvn/standard-repos} project-edn])))
@@ -23,7 +30,7 @@
   ([alias-kws]
    (make-classpath nil alias-kws))
   ([deps-map alias-kws]
-   (let [merged   (or deps-map (project-deps-edn))
+   (let [merged   (or deps-map (project-deps))
          args-map (deps/combine-aliases merged alias-kws)
          ;; lib-map  (deps/resolve-deps merged args-map)
          ]

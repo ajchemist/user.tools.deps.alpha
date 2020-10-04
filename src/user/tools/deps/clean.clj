@@ -62,6 +62,11 @@
    target-directory))
 
 
+(defn clean-x
+  [{:keys [dir options]}]
+  (clean dir options))
+
+
 (set! *warn-on-reflection* false)
 
 

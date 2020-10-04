@@ -122,7 +122,7 @@
     #{'datascript.db}
     nil
     (u.deps/make-classpath
-      (update (u.deps/project-deps-edn)
+      (update (u.deps/project-deps)
         :deps merge
         '{org.clojure/clojure {:mvn/version "1.10.1"}
           datascript          {:mvn/version "0.16.6"}})
