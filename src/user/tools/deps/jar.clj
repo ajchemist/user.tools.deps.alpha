@@ -202,15 +202,15 @@
             exclusion-predicates
             allow-all-dependencies?]
      :as   _options}]
-   (let [[lib coords]   (if (and pom-path (u.jio/file? pom-path))
+   (let [[lib coords]         (if (and pom-path (u.jio/file? pom-path))
                                 (let [pom (pom/read-pom pom-path)]
-                                  [(or lib (maven/get-library-from-pom pom))
-                                   (update coords :mvn/version #(or % (.getVersion pom)))])
-                                [lib coords])
+                            [(or lib (maven/get-library-from-pom pom))
+                             (update coords :mvn/version #(or % (.getVersion pom)))])
+                          [lib coords])
          lib                  (if (qualified-symbol? lib) lib (symbol (name lib) (name lib)))
          artifact-id          (name lib)
          group-id             (namespace lib)
-         target-dir          (u.jio/path (or target-dir "target"))
+         target-dir           (u.jio/path (or target-dir "target"))
          out-path             (u.jio/path (or out-path
                                               (and jarname (u.jio/path-resolve target-dir jarname))
                                               (make-jarpath artifact-id coords target-dir)))
@@ -220,6 +220,7 @@
                                     {:out-path out-path})))
          deps-map             (or deps-map (u.deps/project-deps))
          paths                (or paths (:paths deps-map))
+         compile-path         (or *compile-path* compile-path)
          exclusion-predicates (or exclusion-predicates [io/dotfiles-exclusion-predicate
                                                         io/emacs-backups-exclusion-predicate])]
      (when-not allow-all-dependencies?
@@ -240,7 +241,7 @@
                 (pom-xml-operation (or pom-path "pom.xml") group-id artifact-id)
                 (pom-properties-operation pom-properties group-id artifact-id)
                 (deps-edn-operation group-id artifact-id)]
-               (when compile-path (u.jio/paths-copy-operations [compile-path]))
+               (when (u.jio/directory? compile-path) (u.jio/paths-copy-operations [compile-path]))
                (when-not (empty? paths) (u.jio/paths-copy-operations paths))
                extra-operations)))))
      (str out-path))))
