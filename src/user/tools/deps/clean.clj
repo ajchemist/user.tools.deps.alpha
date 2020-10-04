@@ -41,14 +41,14 @@
 
 (defn sanity-check
   [path allow-outside-target?]
-  (let [root-path   (io/path (System/getProperty "user.dir"))
-        target-path (.resolve root-path "target")]
-    (when (not (io/parent-path? root-path path))
+  (let [root-dir   (io/path (System/getProperty "user.dir"))
+        target-dir (.resolve root-dir "target")]
+    (when (not (io/parent-path? root-dir path))
       (throw (IllegalArgumentException. "Cannot delete a directory outside of project root")))
     (when (and
             (not allow-outside-target?)
-            (not (io/same-directory? target-path path))
-            (not (io/parent-path? target-path path)))
+            (not (io/same-directory? target-dir path))
+            (not (io/parent-path? target-dir path)))
       (throw (IllegalArgumentException. "Cannot delete a directory outside of target-directory. Consider setting the \"allow-outside-target?\" option if you really want to delete this directory.")))))
 
 

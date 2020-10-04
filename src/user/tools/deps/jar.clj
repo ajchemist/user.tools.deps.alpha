@@ -38,15 +38,15 @@
 
 (defn make-jarpath
   ^Path
-  [artifact-id maven-coords target-path]
-  (let [target-path (u.jio/path target-path)]
-    (.resolve target-path (make-jarname artifact-id maven-coords))))
+  [artifact-id coords target-dir]
+  (let [target-dir (u.jio/path target-dir)]
+    (.resolve target-dir (make-jarname artifact-id coords))))
 
 
 (defn get-jar-filesystem
   ^FileSystem
-  [artifact-id maven-coords target-path]
-  (util.jar/getjarfs (make-jarpath artifact-id maven-coords target-path)))
+  [artifact-id coords target-dir]
+  (util.jar/getjarfs (make-jarpath artifact-id coords target-dir)))
 
 
 ;;
@@ -177,7 +177,7 @@
 (defn jar
   "Bundles project resources into a jar file. This function also generates maven description files. By default, this function ensures that all the project dependencies are maven based.
   - lib: A symbol naming the library.
-  - maven-coords: A map with the same format than tools.deps maven coordinates.
+  - coords: A map with the same format than tools.deps maven coordinates.
   - out-path: The path of the produced jar file. When not provided, a default out-path is generated from the lib and maven coordinates.
   - main: A namespace to be added to the \"Main\" entry to the jar manifest. Default to nil.
   - manifest: A map of additionel entries to the jar manifest. Values of the manifest map can be maps to represent manifest sections. By default, the jar manifest contains the \"Created-by\", \"Built-By\" and \"Build-Jdk\" entries.
@@ -185,12 +185,12 @@
   - mvn/repos: Repositories to be copied to the pom.xml file produced while generating the jar. Must have same format than the :mvn/repos entry of deps.edn. Default to nil.
   - exclusion-predicates: Predicates to exclude operations that would otherwise been operated to the jar. Each predicate takes a parameter: file-operation. Default to predicates that excludes dotfiles and emacs backup files.
   - allow-all-dependencies?: A boolean that can be set to true to allow any types of dependency, such as local or git dependencies. Default to false, in which case only maven dependencies are allowed - an exception is thrown when this is not the case. When set to true, the jar is produced even in the presence of non-maven dependencies, but only maven dependencies are added to the jar."
-  ([lib maven-coords]
-   (jar lib maven-coords nil nil))
-  ([lib maven-coords
+  ([lib coords]
+   (jar lib coords nil nil))
+  ([lib coords
     paths
     {:keys [out-path
-            target-path
+            target-dir
             jarname
             compile-path
             deps-map
@@ -202,18 +202,18 @@
             exclusion-predicates
             allow-all-dependencies?]
      :as   _options}]
-   (let [[lib maven-coords]   (if (and pom-path (u.jio/file? pom-path))
+   (let [[lib coords]   (if (and pom-path (u.jio/file? pom-path))
                                 (let [pom (pom/read-pom pom-path)]
                                   [(or lib (maven/get-library-from-pom pom))
-                                   (update maven-coords :mvn/version #(or % (.getVersion pom)))])
-                                [lib maven-coords])
+                                   (update coords :mvn/version #(or % (.getVersion pom)))])
+                                [lib coords])
          lib                  (if (qualified-symbol? lib) lib (symbol (name lib) (name lib)))
          artifact-id          (name lib)
          group-id             (namespace lib)
-         target-path          (u.jio/path (or target-path "target"))
+         target-dir          (u.jio/path (or target-dir "target"))
          out-path             (u.jio/path (or out-path
-                                              (and jarname (u.jio/path-resolve target-path jarname))
-                                              (make-jarpath artifact-id maven-coords target-path)))
+                                              (and jarname (u.jio/path-resolve target-dir jarname))
+                                              (make-jarpath artifact-id coords target-dir)))
          _                    (when-not (str/ends-with? (str out-path) ".jar")
                                 (throw
                                   (ex-info "out-path must be a jar file"
@@ -226,7 +226,7 @@
        (check-non-maven-dependencies deps-map))
      (with-open [jarfs (util.jar/getjarfs out-path)]
        (let [the-manifest   (util.jar/create-manifest main manifest)
-             pom-properties (or pom-properties (pom/make-pom-properties lib maven-coords))]
+             pom-properties (or pom-properties (pom/make-pom-properties lib coords))]
          (io/do-operations
            (u.jio/path jarfs)
            (transduce
@@ -249,7 +249,7 @@
 (defn jar-x
   [{:keys [lib coords paths
            out-path
-           target-path
+           target-dir
            jarname
            compile-path
            deps-map
@@ -262,7 +262,7 @@
            allow-all-dependencies?]}]
   (jar lib coords paths
        {:out-path                out-path
-        :target-path             target-path
+        :target-dir             target-dir
         :jarname                 jarname
         :compile-path            compile-path
         :deps-map                deps-map
@@ -275,71 +275,44 @@
         :allow-all-dependencies? allow-all-dependencies?}))
 
 
-(defn maven-jar
-  {:deprecated true}
-  ([pom-path]
-   (maven-jar pom-path nil nil nil))
-  ([pom-path
-    maven-coords
-    paths
-    {:keys [out-path
-            target-path
-            jarname
-            compile-path
-            deps-map
-            main
-            manifest
-            pom-properties
-            extra-operations
-            exclusion-predicates
-            allow-all-dependencies?]
-     :or   {exclusion-predicates [io/dotfiles-exclusion-predicate
-                                  io/emacs-backups-exclusion-predicate]}
-     :as   _options}]
-   (let [pom          (pom/read-pom pom-path)
-         artifact-id  (.getArtifactId pom)
-         group-id     (.getGroupId pom)
-         maven-coords (update maven-coords :mvn/version #(or % (.getVersion pom)))
-         target-path  (u.jio/path (or target-path "target"))
-         out-path     (u.jio/path (or out-path
-                                      (and jarname (u.jio/path-resolve target-path jarname))
-                                      (make-jarpath artifact-id maven-coords target-path)))
-         _            (when-not (str/ends-with? (str out-path) ".jar")
-                        (throw
-                          (ex-info "out-path must be a jar file"
-                            {:out-path out-path})))
-         deps-map     (or deps-map (u.deps/project-deps))
-         paths        (or paths (:paths deps-map))]
-     (when-not allow-all-dependencies?
-       (check-non-maven-dependencies deps-map))
-     (with-open [jarfs (util.jar/getjarfs out-path)]
-       (let [the-manifest   (util.jar/create-manifest main manifest)
-             pom-properties (or pom-properties (pom/make-pom-properties (keyword group-id artifact-id) maven-coords))]
-         (io/do-operations
-           (u.jio/path jarfs)
-           (transduce
-             (comp
-               (filter map?)
-               (remove (fn [op] (some #(% op) exclusion-predicates))))
-             conj
-             []
-             (concat
-               [(manifest-mf-operation the-manifest)
-                (pom-xml-operation pom-path group-id artifact-id)
-                (pom-properties-operation pom-properties group-id artifact-id)
-                (deps-edn-operation group-id artifact-id)]
-               (when compile-path (u.jio/paths-copy-operations [compile-path]))
-               (when-not (empty? paths) (u.jio/paths-copy-operations paths))
-               extra-operations)))))
-     (str out-path))))
-
-
 (defn uberjar
   [jarpath classpath]
   (let [classpath (or classpath (u.deps/make-classpath))]
     (with-open [jarfs (util.jar/getjarfs jarpath)]
       (uber-classpath classpath (u.jio/path jarfs))))
   jarpath)
+
+
+(defn uberjar-x
+  [{:keys [lib coords paths
+           out-path
+           target-dir
+           jarname
+           compile-path
+           deps-map
+           main
+           manifest
+           pom-path
+           pom-properties
+           extra-operations
+           exclusion-predicates
+           allow-all-dependencies?
+           classpath]}]
+  (uberjar
+    (jar lib coords paths
+         {:out-path                out-path
+          :target-dir              target-dir
+          :jarname                 jarname
+          :compile-path            compile-path
+          :deps-map                deps-map
+          :main                    main
+          :manifest                manifest
+          :pom-path                pom-path
+          :pom-properties          pom-properties
+          :extra-operations        extra-operations
+          :exclusion-predicates    exclusion-predicates
+          :allow-all-dependencies? allow-all-dependencies?})
+    classpath))
 
 
 (defn uber-x

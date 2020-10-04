@@ -17,7 +17,7 @@
 (set! *warn-on-reflection* true)
 
 
-(def ^:dynamic *target-path*)
+(def ^:dynamic *target-dir*)
 (def ^:dynamic *jar-path*)
 
 
@@ -35,17 +35,17 @@
 
 (defn package
   [library version]
-  (let [^String target-path *target-path*
-        ^String jar-path    *jar-path*]
+  (let [^String target-dir *target-dir*
+        ^String jar-path   *jar-path*]
     (time
       (do
-        (clean/clean target-path)
+        (clean/clean target-dir)
         (let [mvn-coords {:mvn/version version}
               pom-path   (maven/sync-pom library mvn-coords)
               jarpath    (jar/jar
                            library nil nil
                            {:pom-path pom-path
-                            :out-path (. (u.jio/as-path target-path) resolve jar-path)})]
+                            :out-path (. (u.jio/as-path target-dir) resolve jar-path)})]
           (println (str (install/install nil nil jarpath pom-path)))
           (println "\n- " version "\n"))))))
 
@@ -55,8 +55,8 @@
   (let [{{:keys [dir library version jar-path]} :options
          :as                                    parsed-opts} (cli/parse-opts xs cli-options)]
     (try
-      (binding [*target-path* dir
-                *jar-path*    jar-path]
+      (binding [*target-dir* dir
+                *jar-path*   jar-path]
         (package library version))
       (catch Throwable e
         (.printStackTrace e)

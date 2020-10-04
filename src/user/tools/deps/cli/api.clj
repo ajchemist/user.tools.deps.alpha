@@ -45,6 +45,12 @@
   (jar/uber-x options))
 
 
+(defn uberjar
+  "Public API for clojure -X usage"
+  [options]
+  (jar/uberjar-x options))
+
+
 (defn deploy
   "Public API for clojure -X usage"
   [options]
@@ -53,9 +59,19 @@
 
 (defn package
   "Public API for clojure -X usage"
-  [{:keys [sync-pom clean javac compile jar uber deploy]}]
+  [{:keys
+    [sync-pom
+     clean
+     javac
+     compile
+     jar
+     uber
+     uberjar
+     deploy]
+    :as options}]
   (when (map? sync-pom)
-    (maven/sync-pom-x sync-pom))
+    (let [sync-pom (merge (select-keys options [:lib :coords]) sync-pom)]
+      (maven/sync-pom-x sync-pom)))
   (when (map? clean)
     (clean/clean-x clean))
   (when (map? javac)
@@ -63,8 +79,13 @@
   (when (map? compile)
     (compile/compile-x compile))
   (when (map? jar)
-    (jar/jar-x jar))
+    (let [jar (merge (select-keys options [:lib :coords]) jar)]
+      (jar/jar-x jar)))
+  (when (map? uberjar)
+    (let [uberjar (merge (select-keys options [:lib :coords]) uberjar)]
+      (jar/uberjar-x uberjar)))
   (when (map? uber)
-    (jar/uber-x uber))
+    (let [uber (merge  uber)]
+      (jar/uber-x uber)))
   (when (map? deploy)
     (deploy/deploy-x deploy)))
