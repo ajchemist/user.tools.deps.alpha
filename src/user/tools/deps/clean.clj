@@ -49,17 +49,18 @@
             (not allow-outside-target?)
             (not (io/same-directory? target-dir path))
             (not (io/parent-path? target-dir path)))
-      (throw (IllegalArgumentException. "Cannot delete a directory outside of target-directory. Consider setting the \"allow-outside-target?\" option if you really want to delete this directory.")))))
+      (throw (IllegalArgumentException. "Cannot delete a directory outside of target-dir. Consider setting the \"allow-outside-target?\" option if you really want to delete this directory.")))))
 
 
 (defn clean
-  "Delete the target-directory. The directory to delete must not be outside of project root. By default, the directory to delete must either be the directory named \"target\" or must be inside the directory named \"target\". Setting the \"allow-outside-target?\" parameter to true makes deleting directories outside \"target\" possible."
-  ([target-directory]
-   (clean target-directory nil))
-  ([target-directory {:keys [allow-outside-target?]}]
-   (sanity-check target-directory allow-outside-target?)
-   (delete-recursively target-directory)
-   target-directory))
+  "Delete the target-dir. The directory to delete must not be outside of project root. By default, the directory to delete must either be the directory named \"target\" or must be inside the directory named \"target\". Setting the \"allow-outside-target?\" parameter to true makes deleting directories outside \"target\" possible."
+  ([target-dir]
+   (clean target-dir nil))
+  ([target-dir {:keys [allow-outside-target?]}]
+   (println "Clean" target-dir)
+   (sanity-check target-dir allow-outside-target?)
+   (delete-recursively target-dir)
+   target-dir))
 
 
 (defn clean-x

@@ -103,6 +103,7 @@
    (let [compiler     (ToolProvider/getSystemJavaCompiler)
          compile-path (or compile-path *compile-path*)
          classpath    (or classpath (u.deps/make-classpath))]
+     (println "Run javac command:" java-source-paths)
      (when (nil? compiler)
        (throw (ex-info "Java compiler not found" {})))
      (javac* compiler java-source-paths compile-path classpath javac-options))))

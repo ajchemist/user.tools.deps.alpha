@@ -1,4 +1,5 @@
 (ns user.tools.deps.cli.api
+  (:refer-clojure :exclude [compile])
   (:require
    [user.tools.deps.maven.alpha :as maven]
    [user.tools.deps.clean :as clean]

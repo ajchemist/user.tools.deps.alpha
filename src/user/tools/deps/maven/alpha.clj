@@ -37,6 +37,7 @@
                          (pom/replace-build paths)
                          (pom/replace-repos repos))
                        (pom/gen-pom group-id artifact-id version deps paths repos))]
+     (println "Sync pom file:" (str pom-file))
      (pom/write-pom pom-file pom)
      (str pom-file))))
 

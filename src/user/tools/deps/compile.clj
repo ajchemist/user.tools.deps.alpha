@@ -71,6 +71,7 @@
                                   [(into-array String
                                      ["--main" (str main-ns)
                                       (pr-str namespaces) (str compile-path) (pr-str compiler-options)])]))))]
+     (println "Compile" (pr-str namespaces) "at" compile-path)
      (.start t)
      (.join t)
      (.close classloader))))

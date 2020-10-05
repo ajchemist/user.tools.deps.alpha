@@ -223,6 +223,7 @@
          compile-path         (or *compile-path* compile-path)
          exclusion-predicates (or exclusion-predicates [io/dotfiles-exclusion-predicate
                                                         io/emacs-backups-exclusion-predicate])]
+     (println "Create jarfile:" out-path)
      (when-not allow-all-dependencies?
        (check-non-maven-dependencies deps-map))
      (with-open [jarfs (util.jar/getjarfs out-path)]
@@ -241,8 +242,12 @@
                 (pom-xml-operation (or pom-path "pom.xml") group-id artifact-id)
                 (pom-properties-operation pom-properties group-id artifact-id)
                 (deps-edn-operation group-id artifact-id)]
-               (when (u.jio/directory? compile-path) (u.jio/paths-copy-operations [compile-path]))
-               (when-not (empty? paths) (u.jio/paths-copy-operations paths))
+               (when (u.jio/directory? compile-path)
+                 (println "\tAdding compile-path:" compile-path)
+                 (u.jio/paths-copy-operations [compile-path]))
+               (when-not (empty? paths)
+                 (println "\tAdding paths:" (pr-str paths))
+                 (u.jio/paths-copy-operations paths))
                extra-operations)))))
      (str out-path))))
 
@@ -279,6 +284,7 @@
 (defn uberjar
   [jarpath classpath]
   (let [classpath (or classpath (u.deps/make-classpath))]
+    (println "Uber classpath ->" jarpath)
     (with-open [jarfs (util.jar/getjarfs jarpath)]
       (uber-classpath classpath (u.jio/path jarfs))))
   jarpath)
