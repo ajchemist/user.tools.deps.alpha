@@ -1,8 +1,8 @@
 /classes
 /.cpcache
-.nrepl-port
 .clj-kondo/.cache
 /target
+.nrepl*
 deploy-key
 deploy-key.pub
 .obsolete
