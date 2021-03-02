@@ -2,14 +2,14 @@
  :deps
  {
   user.java.io/user.java.io                       {:mvn/version "2018.301.48672"}
-  user.apache.maven.alpha/user.apache.maven.alpha {:mvn/version "2020.104.34142"}
+  user.apache.maven.alpha/user.apache.maven.alpha {:mvn/version "2021.61.26503"}
   }
  :aliases
  {
   :provided
   {:extra-deps
    {
-    org.clojure/tools.deps.alpha {:mvn/version "0.9.821"}
+    org.clojure/tools.deps.alpha {:mvn/version "0.9.884"}
     }}
 
 
@@ -38,5 +38,5 @@
   :1.10
   {:extra-deps
    {
-    org.clojure/clojure {:mvn/version "1.10.1"}
+    org.clojure/clojure {:mvn/version "1.10.2"}
     }}}}
