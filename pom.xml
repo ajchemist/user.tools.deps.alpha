@@ -4,9 +4,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>user.tools.deps.alpha</groupId>
   <artifactId>user.tools.deps.alpha</artifactId>
-  <version>2020.289.43390</version>
+  <version>2021.61.27107</version>
   <scm>
-    <url>https://github.com/aJchemist/user.tools.deps.alpha</url>
+    <url>https://github.com/ajchemist/user.tools.deps.alpha</url>
   </scm>
   <dependencies>
     <dependency>
@@ -17,7 +17,7 @@
     <dependency>
       <groupId>user.apache.maven.alpha</groupId>
       <artifactId>user.apache.maven.alpha</artifactId>
-      <version>2020.104.34142</version>
+      <version>2021.61.26503</version>
     </dependency>
   </dependencies>
   <repositories>
