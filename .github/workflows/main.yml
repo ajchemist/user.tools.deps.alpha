@@ -46,9 +46,9 @@ jobs:
 
 
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@2.0
+        uses: DeLaGuardo/setup-clojure@master
         with:
-          tools-deps: '1.10.1.697'
+          cli: '1.10.2.796'
 
 
       - name: Test runner
@@ -92,15 +92,17 @@ jobs:
 
 
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@2.0
+        uses: DeLaGuardo/setup-clojure@master
         with:
-          tools-deps: '1.10.1.697'
+          cli: '1.10.2.796'
 
 
       - name: Make package
         env:
           LIBRARY: user.tools.deps.alpha
         run: clojure -M:1.10:provided:test -m user.tools.deps.script.package -r $LIBRARY
+      - name: Edit pom
+        run: clojure -M:1.10:provided:test -m user.apache.maven.script.edit-pom --scm-url $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
 
 
       - name: Deploy
