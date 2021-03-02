@@ -4,16 +4,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>user.tools.deps.alpha</groupId>
   <artifactId>user.tools.deps.alpha</artifactId>
-  <version>2020.279.31960</version>
+  <version>2020.289.43390</version>
   <scm>
     <url>https://github.com/aJchemist/user.tools.deps.alpha</url>
   </scm>
   <dependencies>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.deps.alpha</artifactId>
-      <version>0.9.799</version>
-    </dependency>
     <dependency>
       <groupId>user.java.io</groupId>
       <artifactId>user.java.io</artifactId>
