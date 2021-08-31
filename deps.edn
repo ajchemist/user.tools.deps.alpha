@@ -9,7 +9,7 @@
   :provided
   {:extra-deps
    {
-    org.clojure/tools.deps.alpha {:mvn/version "0.9.884"}
+    org.clojure/tools.deps.alpha {:mvn/version "0.12.1030"}
     }}
 
 
@@ -17,15 +17,21 @@
   {:extra-paths ["test"]
    :extra-deps
    {
-    org.clojure/tools.cli         {:mvn/version "1.0.194"}
+    org.clojure/tools.cli         {:mvn/version "1.0.206"}
     org.clojure/tools.namespace   {:mvn/version "1.0.0"}
     user.java.time/user.java.time {:git/url "https://github.com/aJchemist/user.java.time.git" :sha "3a41c91dbc37a6109500185d04299d4a9cf9fa80"}
     }}
 
 
   :test-runner
-  {:extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner" :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
-   :main-opts  ["-m" "cognitect.test-runner" "-d" "test"]}
+  {
+   :extra-deps {io.github.cognitect-labs/test-runner
+                {:git/url "https://github.com/cognitect-labs/test-runner.git"
+                 :sha     "9e35c979860c75555adaff7600070c60004a0f44"}}
+   :main-opts  ["-m" "cognitect.test-runner"]
+   :exec-fn    cognitect.test-runner.api/test
+   :exec-args  {:dirs ["src/test"]}
+   }
 
 
   :1.9
@@ -38,5 +44,5 @@
   :1.10
   {:extra-deps
    {
-    org.clojure/clojure {:mvn/version "1.10.2"}
+    org.clojure/clojure {:mvn/version "1.10.3"}
     }}}}
